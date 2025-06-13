@@ -1,3 +1,8 @@
-<menubar-component (drawerToggle)="toggle()" />
-<sidebar-componet [toggleState]="drawer" />
-<router-outlet />
+<sidebar-componet />
+<div
+  class="transition-all duration-300"
+  [ngClass]="{ 'ml-80': drawerState, 'ml-0': !drawerState }"
+>
+  <menubar-component />
+  <router-outlet />
+</div>

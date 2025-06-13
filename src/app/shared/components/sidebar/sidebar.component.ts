@@ -1,35 +1,34 @@
-import {
-  Component,
-  ViewChild,
-  WritableSignal,
-  input,
-  signal,
-  effect,
-} from '@angular/core';
+import { Component, ViewChild, inject } from '@angular/core';
 import { DrawerModule } from 'primeng/drawer';
 import { ButtonModule } from 'primeng/button';
 import { Ripple } from 'primeng/ripple';
 import { AvatarModule } from 'primeng/avatar';
 import { StyleClass } from 'primeng/styleclass';
 import { Drawer } from 'primeng/drawer';
+import { AppService } from '../../../app.service';
+import { CommonModule } from '@angular/common';
 @Component({
   selector: 'sidebar-componet',
-  imports: [DrawerModule, ButtonModule, Ripple, AvatarModule, StyleClass],
+  imports: [
+    DrawerModule,
+    ButtonModule,
+    Ripple,
+    AvatarModule,
+    StyleClass,
+    CommonModule,
+  ],
   templateUrl: './sidebar.component.html',
   styleUrl: './sidebar.component.css',
 })
 export class SidebarComponent {
   @ViewChild('drawerRef') drawerRef!: Drawer;
-  readonly toggleState = input<boolean>(false);
-  visible: WritableSignal<boolean> = signal<boolean>(false);
-  constructor() {
-    effect(() => {
-      if (this.toggleState) this.visible.set(this.toggleState());
-    });
-  }
+  private readonly appService: AppService = inject(AppService);
+
   closeCallback(e: Event): void {
-    this.toggleState;
-    this.visible.set(false);
+    this.appService.setDrawerState(false);
     this.drawerRef.close(e);
+  }
+  get drawerState(): boolean {
+    return this.appService.drawerState;
   }
 }

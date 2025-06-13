@@ -1,5 +1,11 @@
-<div class="card flex justify-center">
-  <p-drawer #drawerRef [(visible)]="visible">
+<div
+  class="card flex justify-center z-50 transition-transform duration-30"
+  [ngClass]="{
+    '-translate-x-full': !drawerState,
+    'translate-x-0': drawerState
+  }"
+>
+  <p-drawer #drawerRef [(visible)]="drawerState">
     <ng-template #headless>
       <div class="flex flex-col h-full">
         <div class="flex items-center justify-between px-6 pt-4 shrink-0">
