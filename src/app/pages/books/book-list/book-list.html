@@ -1,0 +1,73 @@
+<div class="card">
+  <p-dataview
+    #dv
+    [value]="books()"
+    [layout]="layout"
+    [paginator]="!!books().length"
+    [rows]="rows"
+    [totalRecords]="totalRecords"
+    [first]="first"
+    (onPage)="onPageChange($event)"
+    emptyMessage=" "
+  >
+    <ng-template #header>
+      <div class="flex items-center gap-2">
+        <p-selectbutton
+          [(ngModel)]="layout"
+          [options]="options"
+          [allowEmpty]="false"
+        >
+          <ng-template let-item pTemplate="item">
+            <i
+              class="pi"
+              [ngClass]="{
+                'pi-bars': item === 'list',
+                'pi-table': item === 'grid'
+              }"
+            ></i>
+          </ng-template>
+        </p-selectbutton>
+        <button
+          pButton
+          icon="pi pi-plus"
+          label="Agregar"
+          (click)="onAdd()"
+        ></button>
+      </div>
+    </ng-template>
+
+    <ng-template #list let-items>
+      @for (book of items; track $index) {
+      <book-layout
+        [ngClass]="{
+          'border-t border-surface-200 dark:border-surface-700': !true
+        }"
+        (click)="showBook(book)"
+        [book]="book"
+        [isListLayout]="true"
+      />
+      }@empty { @for ( i of counterArray(8); track $index) {
+      <skeleton-book-component
+        [isListLayout]="true"
+        [ngClass]="{
+          'border-t border-surface-200 dark:border-surface-700': !first
+        }"
+      />
+      } }
+    </ng-template>
+
+    <ng-template #grid let-items>
+      <div class="grid grid-cols-12 gap-4">
+        @for (book of items; track $index) {
+        <book-layout
+          [isListLayout]="false"
+          (click)="showBook(book)"
+          [book]="book"
+        />
+        }@empty { @for ( i of counterArray(8);; track $index) {
+        <skeleton-book-component [isListLayout]="false" />
+        } }
+      </div>
+    </ng-template>
+  </p-dataview>
+</div>

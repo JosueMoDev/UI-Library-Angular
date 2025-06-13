@@ -5,7 +5,7 @@ import { Ripple } from 'primeng/ripple';
 import { AvatarModule } from 'primeng/avatar';
 import { StyleClass } from 'primeng/styleclass';
 import { Drawer } from 'primeng/drawer';
-import { AppService } from '../../../app.service';
+import { AppService } from '../../../services/app.service';
 import { CommonModule } from '@angular/common';
 @Component({
   selector: 'sidebar-componet',

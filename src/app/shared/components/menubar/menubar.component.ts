@@ -1,7 +1,7 @@
 import { Component, computed, effect, inject, signal } from '@angular/core';
 import { MenuItem } from 'primeng/api';
 import { Menubar } from 'primeng/menubar';
-import { AppService } from '../../../app.service';
+import { AppService } from '../../../services/app.service';
 
 @Component({
   selector: 'menubar-component',

@@ -1719,6 +1719,24 @@
     postcss "^8.4.41"
     tailwindcss "4.1.0"
 
+"@tanstack/angular-query-experimental@^5.80.7":
+  version "5.80.7"
+  resolved "https://registry.yarnpkg.com/@tanstack/angular-query-experimental/-/angular-query-experimental-5.80.7.tgz#4d44c9c8b31f6e9585488f4f818957fbcf3e97e6"
+  integrity sha512-eO23TFVliEzZ3A1PFbegddN8UKXqg02BX6azktUP48Zsqq8OTAK74VvReNfKFm5muTnchbRAbKg3Qeg/GGdFVw==
+  dependencies:
+    "@tanstack/query-core" "5.80.7"
+    "@tanstack/query-devtools" "5.80.0"
+
+"@tanstack/query-core@5.80.7":
+  version "5.80.7"
+  resolved "https://registry.yarnpkg.com/@tanstack/query-core/-/query-core-5.80.7.tgz#e029b26cad02fc5fe64116ac245aad0c3e5f83b4"
+  integrity sha512-s09l5zeUKC8q7DCCCIkVSns8zZrK4ZDT6ryEjxNBFi68G4z2EBobBS7rdOY3r6W1WbUDpc1fe5oY+YO/+2UVUg==
+
+"@tanstack/query-devtools@5.80.0":
+  version "5.80.0"
+  resolved "https://registry.yarnpkg.com/@tanstack/query-devtools/-/query-devtools-5.80.0.tgz#7fc7d0e3d935a0f163e06e9477bbf11b3c20fad5"
+  integrity sha512-D6gH4asyjaoXrCOt5vG5Og/YSj0D/TxwNQgtLJIgWbhbWCC/emu2E92EFoVHh4ppVWg1qT2gKHvKyQBEFZhCuA==
+
 "@tufjs/canonical-json@2.0.0":
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/@tufjs/canonical-json/-/canonical-json-2.0.0.tgz#a52f61a3d7374833fca945b2549bc30a2dd40d0a"
