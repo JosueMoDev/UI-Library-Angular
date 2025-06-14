@@ -42,7 +42,7 @@
         [ngClass]="{
           'border-t border-surface-200 dark:border-surface-700': !true
         }"
-        (click)="showBook(book)"
+        (click)="editBook(book)"
         [book]="book"
         [isListLayout]="true"
       />
@@ -61,7 +61,7 @@
         @for (book of items; track $index) {
         <book-layout
           [isListLayout]="false"
-          (click)="showBook(book)"
+          (click)="editBook(book)"
           [book]="book"
         />
         }@empty { @for ( i of counterArray(8);; track $index) {

@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import { Component, inject, signal, OnInit, input } from '@angular/core';
 import { DataView } from 'primeng/dataview';
 import { ButtonModule } from 'primeng/button';
 import { CommonModule } from '@angular/common';
@@ -65,20 +65,29 @@ export default class BookList implements OnInit {
   counterArray(n: number): any[] {
     return Array(n);
   }
-
-  showBook(book: any) {
-    console.log(book);
-  }
-
-  async addBook() {
+  addBook() {
     this.ref = this.modalController.open(BookModal, {
-      width: '100vw',
-      height: '100vh',
-      dismissableMask: true,
-      closable: true,
+      width: '50%',
+      height: 'auto',
+      dismissableMask: false,
+      modal: true,
     });
 
     this.ref.onClose.subscribe((result) => {
+      if (!result) this.ref.destroy();
+    });
+  }
+
+  editBook(book: any) {
+    this.ref = this.modalController.open(BookModal, {
+      width: '50%',
+      height: 'auto',
+      dismissableMask: false,
+      modal: true,
+      data: book,
+    });
+    this.ref.onClose.subscribe((result) => {
+      if (!result) this.ref.destroy();
       if (result) {
         console.log('Resultado del modal:', result);
       }

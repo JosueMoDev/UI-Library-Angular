@@ -18,16 +18,7 @@ export class BookLayout {
       : 'col-span-12 sm:col-span-6 md:col-span-4 xl:col-span-3 p-2 cursor-pointer hover:shadow-md hover:opacity-80 transition-all duration-200 rounded';
   }
   getSeverity(book: any) {
-    switch (book.inventoryStatus) {
-      case 'INSTOCK':
-        return 'success';
-      case 'LOWSTOCK':
-        return 'warn';
-      case 'OUTOFSTOCK':
-        return 'danger';
-      default:
-        return null;
-    }
+    return book.physicalEnable ? 'success' : undefined;
   }
 
   showBook(book: any) {

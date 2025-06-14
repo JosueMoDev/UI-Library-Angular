@@ -1,66 +1,10 @@
-<!-- <div
-  (click)="showBook(book())"
-  class="cursor-pointer transition-all duration-200 rounded hover:shadow-md hover:opacity-80"
-  [class.book-list]="viewType() === 'list'"
-  [class.book-grid]="viewType() === 'grid'"
->
-  <div
-    [class.book-list__image-wrapper]="viewType() === 'list'"
-    [class.book-grid__image-wrapper]="viewType() === 'grid'"
-  >
-    <img
-      [class.book-list__image]="viewType() === 'list'"
-      [class.book-grid__image]="viewType() === 'grid'"
-      [src]="
-        'https://primefaces.org/cdn/primeng/images/demo/product/' + book().image
-      "
-      [alt]="book().name"
-    />
-    <p-tag
-      [value]="book().inventoryStatus"
-      [severity]="getSeverity(book())!"
-      class="book-tag"
-      [style.left.px]="4"
-      [style.top.px]="4"
-    />
-  </div>
-
-  <div
-    [class.book-list__content]="viewType() === 'list'"
-    [class.book-grid__content]="viewType() === 'grid'"
-  >
-    <div [class.book-list__info]="viewType() === 'list'">
-      <span class="book-category">{{ book().category }}</span>
-      <div class="book-title">{{ book().name }}</div>
-      <div class="book-rating">
-        <span>{{ book().rating }}</span>
-        <i class="pi pi-star-fill text-yellow-500"></i>
-      </div>
-    </div>
-
-    <div [class.book-list__buy]="viewType() === 'list'">
-      <span class="book-price">{{ book().price | currency : "USD" }}</span>
-      <div class="book-actions">
-        <button
-          pButton
-          icon="pi pi-shopping-cart"
-          label="Buy Now"
-          [disabled]="book().inventoryStatus === 'OUTOFSTOCK'"
-        ></button>
-        <button pButton icon="pi pi-heart" outlined></button>
-      </div>
-    </div>
-  </div>
-</div> -->
 @if(isListLayout()){
 
 <div class="md:w-40 relative">
   <img
     class="block xl:block mx-auto rounded w-full"
-    [src]="
-      'https://primefaces.org/cdn/primeng/images/demo/product/' + book().image
-    "
-    [alt]="book().name"
+    [src]="book().image"
+    [alt]="book().title"
   />
   <p-tag
     [value]="book().inventoryStatus"
@@ -79,7 +23,7 @@
       <span class="font-medium text-surface-500 dark:text-surface-400 text-sm">
         {{ book().category }}
       </span>
-      <div class="text-lg font-medium mt-2">{{ book().name }}</div>
+      <div class="text-lg font-medium mt-2">{{ book().title }}</div>
     </div>
     <div class="bg-surface-100 p-1" style="border-radius: 30px">
       <div
@@ -119,11 +63,8 @@
     <div class="relative mx-auto">
       <img
         class="rounded w-full"
-        [src]="
-          'https://primefaces.org/cdn/primeng/images/demo/product/' +
-          book().image
-        "
-        [alt]="book().name"
+        [src]="book().image"
+        [alt]="book().title"
         style="max-width: 300px"
       />
       <p-tag
@@ -144,7 +85,7 @@
         >
           {{ book().category }}
         </span>
-        <div class="text-lg font-medium mt-1">{{ book().name }}</div>
+        <div class="text-lg font-medium mt-1">{{ book().title }}</div>
       </div>
       <div class="bg-surface-100 p-1" style="border-radius: 30px; height: 100%">
         <div
