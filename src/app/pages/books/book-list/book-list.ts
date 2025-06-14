@@ -7,7 +7,8 @@ import { FormsModule } from '@angular/forms';
 import { SelectButton } from 'primeng/selectbutton';
 import { SkeletonBookComponent } from '@pages/books/components/skeleton-book/skeleton-book';
 import { BookLayout } from '@pages/books/components/book-layout/book-layout';
-
+import { DialogService, DynamicDialogRef } from 'primeng/dynamicdialog';
+import { BookModal } from '../components/book-modal/book-modal';
 @Component({
   selector: 'books-list',
   templateUrl: './book-list.html',
@@ -29,6 +30,8 @@ export default class BookList implements OnInit {
   options = ['list', 'grid'];
 
   booksService = inject(BooksService);
+  modalController: DialogService = inject(DialogService);
+  private ref!: DynamicDialogRef;
 
   rows = 6;
   first = 0;
@@ -63,11 +66,22 @@ export default class BookList implements OnInit {
     return Array(n);
   }
 
-  onAdd() {
-    console.log('Agregar nuevo elemento');
-  }
-
   showBook(book: any) {
     console.log(book);
+  }
+
+  async addBook() {
+    this.ref = this.modalController.open(BookModal, {
+      width: '100vw',
+      height: '100vh',
+      dismissableMask: true,
+      closable: true,
+    });
+
+    this.ref.onClose.subscribe((result) => {
+      if (result) {
+        console.log('Resultado del modal:', result);
+      }
+    });
   }
 }

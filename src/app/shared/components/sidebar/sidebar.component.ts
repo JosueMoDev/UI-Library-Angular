@@ -23,12 +23,13 @@ import { CommonModule } from '@angular/common';
 export class SidebarComponent {
   @ViewChild('drawerRef') drawerRef!: Drawer;
   private readonly appService: AppService = inject(AppService);
+  visible: boolean = false;
 
   closeCallback(e: Event): void {
     this.appService.setDrawerState(false);
     this.drawerRef.close(e);
   }
   get drawerState(): boolean {
-    return this.appService.drawerState;
+    return (this.visible = this.appService.drawerState);
   }
 }

@@ -4,15 +4,15 @@ import { Injectable, signal, WritableSignal } from '@angular/core';
   providedIn: 'root',
 })
 export class AppService {
-  readonly #drawerState: WritableSignal<boolean> = signal<boolean>(false);
+  state: WritableSignal<boolean> = signal<boolean>(false);
 
   constructor() {}
 
   get drawerState(): boolean {
-    return this.#drawerState();
+    return this.state();
   }
 
   setDrawerState(state: boolean) {
-    this.#drawerState.update(() => state);
+    this.state.update(() => state);
   }
 }
