@@ -21,6 +21,10 @@ export class BooksService {
         inventoryStatus: 'Disponible',
         rating: 5,
         physicalEnable: true,
+        authors: [
+          '3b61a8df-237b-4d6c-b2ed-81026df10b4b',
+          'fc2f8d0b-d48f-4347-b1d3-97c0eac2b70a',
+        ],
       },
       {
         id: '5530c95d-5db7-4043-9204-61c31eec2d3d',

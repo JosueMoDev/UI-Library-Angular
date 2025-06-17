@@ -124,6 +124,7 @@ export class BookModal {
         name: this.book.title,
         objectURL: this.book.image,
       });
+      this.selectedAuthors = this.book?.authors ?? [];
       this.uploadedFiles = this.uploadedFiles;
     }
 
