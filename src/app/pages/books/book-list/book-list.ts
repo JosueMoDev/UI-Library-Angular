@@ -1,14 +1,15 @@
 import { Component, inject, signal, OnInit, input } from '@angular/core';
 import { DataView } from 'primeng/dataview';
-import { ButtonModule } from 'primeng/button';
 import { CommonModule } from '@angular/common';
 import { BooksService } from '@pages/books/books.service';
 import { FormsModule } from '@angular/forms';
 import { SelectButton } from 'primeng/selectbutton';
-import { SkeletonBookComponent } from '@pages/books/components/skeleton-book/skeleton-book';
 import { BookLayout } from '@pages/books/components/book-layout/book-layout';
 import { DialogService, DynamicDialogRef } from 'primeng/dynamicdialog';
 import { BookModal } from '../components/book-modal/book-modal';
+import { SkeletonBook } from '@pages/books/components/skeleton-book/skeleton-book';
+import { ButtonModule } from 'primeng/button';
+
 @Component({
   selector: 'books-list',
   templateUrl: './book-list.html',
@@ -20,7 +21,7 @@ import { BookModal } from '../components/book-modal/book-modal';
     SelectButton,
     FormsModule,
     BookLayout,
-    SkeletonBookComponent,
+    SkeletonBook,
   ],
   providers: [BooksService],
 })

@@ -47,7 +47,7 @@
         [isListLayout]="true"
       />
       }@empty { @for ( i of counterArray(8); track $index) {
-      <skeleton-book-component
+      <book-skeleton
         [isListLayout]="true"
         [ngClass]="{
           'border-t border-surface-200 dark:border-surface-700': !first
@@ -65,7 +65,7 @@
           [book]="book"
         />
         }@empty { @for ( i of counterArray(8);; track $index) {
-        <skeleton-book-component [isListLayout]="false" />
+        <book-skeleton [isListLayout]="false" />
         } }
       </div>
     </ng-template>

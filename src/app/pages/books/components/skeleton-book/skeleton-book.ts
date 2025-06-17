@@ -2,12 +2,12 @@ import { Component, HostBinding, input } from '@angular/core';
 import { Skeleton } from 'primeng/skeleton';
 
 @Component({
-  selector: 'skeleton-book-component',
+  selector: 'book-skeleton',
   imports: [Skeleton],
   templateUrl: './skeleton-book.html',
   styleUrl: './skeleton-book.css',
 })
-export class SkeletonBookComponent {
+export class SkeletonBook {
   isListLayout = input<boolean>(false);
   @HostBinding('class')
   get hostClass() {
