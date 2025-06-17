@@ -18,7 +18,7 @@
     </div>
   </ng-template>
   <ng-template #title> Crear Libro </ng-template>
-  <form class="m-5" [formGroup]="form" (ngSubmit)="submit()">
+  <form class="m-5" [formGroup]="form">
     @if(step() === 0) {
     <div class="grid gap-4">
       <input pInputText formControlName="title" placeholder="Título" />
@@ -57,6 +57,66 @@
       </div>
     </div>
     } @if (step() === 1) {
+    <div class="card">
+      <p-table
+        #dt
+        [value]="authors"
+        [(selection)]="selectedAuthors"
+        [rowHover]="true"
+        [rows]="5"
+        [paginator]="true"
+        (onRowSelect)="setSelectedAuthors()"
+        (onRowUnselect)="setSelectedAuthors()"
+      >
+        <ng-template #caption>
+          <p-iconfield iconPosition="left" class="w-full">
+            <p-inputicon>
+              <i class="pi pi-search"></i>
+            </p-inputicon>
+            <input
+              pInputText
+              type="text"
+              class="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Global Search"
+              (blur)="onSearchAuthor($event)"
+            />
+          </p-iconfield>
+        </ng-template>
+        <ng-template #header>
+          <tr>
+            <th style="width: 4rem"></th>
+            <th></th>
+            <th>Full Name</th>
+            <th>Nationality</th>
+            <th>Age</th>
+          </tr>
+        </ng-template>
+        <ng-template #body let-author>
+          <tr>
+            <td>
+              <p-tableCheckbox [value]="author.id" />
+            </td>
+            <td>
+              <img
+                [src]="author.photo"
+                [alt]="author.name"
+                width="50"
+                class="shadow-lg"
+              />
+            </td>
+            <td field="fullname">{{author.name}} {{author.lastname}}</td>
+            <td>{{author.nationality}}</td>
+            <td>{{author.age}} years old</td>
+          </tr>
+        </ng-template>
+        <ng-template #emptymessage>
+          <tr>
+            <td colspan="8">No customers found.</td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </div>
+    } @if (step() === 2) {
     <p-toast />
     <p-fileupload
       name="myfile[]"
@@ -208,8 +268,10 @@
         styleClass="w-full"
         pButton
         label="Guardar"
+        type="submit"
         severity="success"
         [disabled]="form.invalid"
+        (onClick)="submit()"
       />
     </div>
   </ng-template>

@@ -15,6 +15,11 @@ import { PrimeNG } from 'primeng/config';
 import { DropdownModule } from 'primeng/dropdown';
 import { Card } from 'primeng/card';
 import { ConfirmDialog } from 'primeng/confirmdialog';
+import { IconFieldModule } from 'primeng/iconfield';
+import { TableModule } from 'primeng/table';
+import { InputIcon } from 'primeng/inputicon';
+import { Tag } from 'primeng/tag';
+import { AuthorsService } from '@pages/authors/authors.service';
 
 @Component({
   selector: 'book-modal',
@@ -35,6 +40,9 @@ import { ConfirmDialog } from 'primeng/confirmdialog';
     DropdownModule,
     Card,
     ConfirmDialog,
+    IconFieldModule,
+    TableModule,
+    InputIcon,
   ],
 })
 export class BookModal {
@@ -45,6 +53,7 @@ export class BookModal {
   private config: PrimeNG = inject(PrimeNG);
   private messageService: MessageService = inject(MessageService);
   private confirmController: ConfirmationService = inject(ConfirmationService);
+  private authorService: AuthorsService = inject(AuthorsService);
 
   step = signal<number>(0);
   steps: MenuItem[] | undefined;
@@ -52,13 +61,16 @@ export class BookModal {
   totalSize: number = 0;
   totalSizePercent: number = 0;
   book: any | undefined;
+  authors: any[] = [];
+  selectedAuthors: any[] = [];
 
   form = this.fb.group({
-    title: ['', Validators.required],
-    price: [0, Validators.required],
+    title: ['EL ALQUIMISTA', Validators.required],
+    price: [20, Validators.required],
     description: ['', Validators.required],
     category: [null, Validators.required],
     genre: [null, Validators.required],
+    authors: [[], Validators.required],
     physicalEnable: [false],
   });
 
@@ -105,6 +117,7 @@ export class BookModal {
 
   ngOnInit(): void {
     this.book = this.configDialog.data;
+    this.authors = this.authorService.authors;
     if (this.book) {
       this.form.patchValue(this.book);
       this.uploadedFiles.push({
@@ -116,10 +129,16 @@ export class BookModal {
 
     this.steps = [
       {
-        label: 'Info',
+        label: 'Information',
+        icon: 'pi pi-info',
       },
       {
-        label: 'File',
+        label: 'Pick Author',
+        icon: 'pi pi-person',
+      },
+      {
+        label: 'Book Cover',
+        icon: 'pi pi-file',
       },
     ];
   }
@@ -205,5 +224,15 @@ export class BookModal {
       });
     }
     return this.ref.close();
+  }
+  changeStep(event: number) {
+    this.steps![event].visible;
+  }
+  setSelectedAuthors() {
+    this.form.get('authors')?.patchValue(this.selectedAuthors as any);
+  }
+  onSearchAuthor(event: Event) {
+    const input = event.target as HTMLInputElement;
+    console.log(input.value);
   }
 }
