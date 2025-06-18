@@ -1,7 +1,7 @@
 import { Component, inject, signal, OnInit, input } from '@angular/core';
 import { DataView } from 'primeng/dataview';
 import { CommonModule } from '@angular/common';
-import { BooksService } from '@pages/books/books.service';
+import { BooksService } from '@pages/books/services/books.service';
 import { FormsModule } from '@angular/forms';
 import { SelectButton } from 'primeng/selectbutton';
 import { BookLayout } from '@pages/books/components/book-layout/book-layout';

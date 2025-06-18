@@ -39,17 +39,57 @@
       ></textarea>
       <label for="description">Description</label>
 
-      <p-dropdown
-        [options]="categories"
-        formControlName="category"
-        placeholder="Categoría"
-      ></p-dropdown>
-      <p-dropdown
+      <p-multiselect
         [options]="genres"
-        formControlName="genre"
-        placeholder="Género"
-        optionValue="value"
-      ></p-dropdown>
+        formControlName="genres"
+        placeholder="Select Some Genres"
+        optionLabel="name"
+        styleClass="w-full mb-10"
+        display="chip"
+        [appendTo]="'body'"
+      >
+        <ng-template let-genre #item>
+          <div class="flex items-center justify-between w-full">
+            <span>{{ genre.name }}</span>
+            <p-button
+              [rounded]="true"
+              (click)="editGenre(genre, $event)"
+              [text]="true"
+              icon="pi pi-pencil"
+            />
+          </div>
+        </ng-template>
+        <ng-template #dropdownicon>
+          <i class="pi pi-list"></i>
+        </ng-template>
+        <ng-template #filtericon>
+          <i class="pi pi-search"></i>
+        </ng-template>
+        <ng-template #header>
+          <div class="font-medium px-3 py-2">
+            Select somo genres for your book
+          </div>
+        </ng-template>
+        <ng-template #footer>
+          <div class="p-3 flex justify-between">
+            <p-button
+              (click)="addNewGenre()"
+              label="Add New"
+              severity="primary"
+              text
+              size="small"
+              icon="pi pi-plus"
+            />
+            <p-button
+              label="Remove All"
+              severity="danger"
+              text
+              size="small"
+              icon="pi pi-times"
+            />
+          </div>
+        </ng-template>
+      </p-multiselect>
 
       <div class="flex items-center gap-2">
         <label for="physical">Compra física</label>
@@ -100,8 +140,8 @@
               <img
                 [src]="author.photo"
                 [alt]="author.name"
-                width="50"
-                class="shadow-lg"
+                width="80"
+                class="shadow-lg rounded-md"
               />
             </td>
             <td field="fullname">{{author.name}} {{author.lastname}}</td>
