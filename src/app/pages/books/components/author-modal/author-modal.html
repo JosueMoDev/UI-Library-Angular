@@ -17,36 +17,31 @@
       />
     </div>
   </ng-template>
-  <ng-template #title> Crear Libro </ng-template>
+  <ng-template #title> Crear Author </ng-template>
   <form class="m-5" [formGroup]="form">
     @if(step() === 0) {
     <div class="grid gap-4">
-      <input pInputText formControlName="title" placeholder="Título" />
-      <input
-        pInputText
-        type="number"
-        formControlName="price"
-        placeholder="Precio"
-      />
+      <input pInputText formControlName="name" placeholder="Name" />
+      <input pInputText formControlName="lastname" placeholder="Lastname" />
+      <input pInputText type="number" formControlName="age" placeholder="Age" />
 
       <textarea
         pInputText
         pSize="large"
-        id="description"
-        formControlName="description"
+        id="biography"
+        formControlName="biography"
         rows="5"
         cols="30"
       ></textarea>
-      <label for="description">Description</label>
+      <label for="description">Biography</label>
 
-      <p-multiselect
+      <!-- <p-multiselect
         [options]="genres"
         formControlName="genres"
         placeholder="Select Some Genres"
         optionLabel="name"
         styleClass="w-full mb-10"
         display="chip"
-        [maxSelectedLabels]="8"
         [appendTo]="'body'"
         (onShow)="disableBackgroundScroll()"
         (onHide)="enableBackgroundScroll()"
@@ -76,75 +71,6 @@
         <ng-template #footer>
           <div class="p-3 flex justify-between">
             <p-button
-              (click)="addNewGenre()"
-              label="Add New"
-              severity="primary"
-              text
-              size="small"
-              icon="pi pi-plus"
-            />
-            <p-button
-              label="Remove All"
-              severity="danger"
-              text
-              size="small"
-              icon="pi pi-times"
-              (click)="onRemoveAll('genres')"
-            />
-          </div>
-        </ng-template>
-      </p-multiselect>
-
-      <p-multiselect
-        [options]="authors"
-        formControlName="authors"
-        placeholder="Select Some Authors"
-        styleClass="w-full mb-10"
-        optionLabel="fullName"
-        display="chip"
-        [maxSelectedLabels]="6"
-        [appendTo]="'body'"
-        (onShow)="disableBackgroundScroll()"
-        (onHide)="enableBackgroundScroll()"
-      >
-        <ng-template let-author #item>
-          <div class="flex items-center justify-between w-full">
-            <div class="flex items-center gap-3">
-              <img
-                [alt]="author.fullName"
-                [src]="author.photo"
-                style="
-                  width: 48px;
-                  height: 48px;
-                  border-radius: 9999px;
-                  object-fit: cover;
-                "
-              />
-              <span class="font-medium text-base">{{ author.fullName }}</span>
-            </div>
-
-            <p-button
-              [rounded]="true"
-              (click)="editAuthor(author, $event)"
-              [text]="true"
-              icon="pi pi-pencil"
-            />
-          </div>
-        </ng-template>
-        <ng-template #dropdownicon>
-          <i class="pi pi-list"></i>
-        </ng-template>
-        <ng-template #filtericon>
-          <i class="pi pi-search"></i>
-        </ng-template>
-        <ng-template #header>
-          <div class="font-medium px-3 py-2">
-            Select somo authors for your book
-          </div>
-        </ng-template>
-        <ng-template #footer>
-          <div class="p-3 flex justify-between">
-            <p-button
               (click)="addAuthor()"
               label="Add New"
               severity="primary"
@@ -158,16 +84,10 @@
               text
               size="small"
               icon="pi pi-times"
-              (click)="onRemoveAll('authors')"
             />
           </div>
         </ng-template>
-      </p-multiselect>
-
-      <div class="flex items-center gap-2">
-        <label for="physical">Compra física</label>
-        <p-toggleswitch formControlName="physicalEnable" inputId="physical" />
-      </div>
+      </p-multiselect> -->
     </div>
     } @if (step() === 1) {
     <p-toast />

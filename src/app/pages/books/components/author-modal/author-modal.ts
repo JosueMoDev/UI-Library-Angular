@@ -20,22 +20,15 @@ import { Card } from 'primeng/card';
 import { ConfirmDialog } from 'primeng/confirmdialog';
 import { IconFieldModule } from 'primeng/iconfield';
 import { TableModule } from 'primeng/table';
-import { AuthorsService } from '@pages/books/services/authors.service';
-import { GenresService } from '@pages/books/services/genres.service';
 import { MultiSelectModule } from 'primeng/multiselect';
-import { GenreModal } from '../genre-modal/genre-modal';
-import { AuthorModal } from '../author-modal/author-modal';
 
 @Component({
-  selector: 'book-modal',
-  templateUrl: './book-modal.html',
-  styleUrl: './book-modal.css',
+  selector: 'app-author-modal',
   imports: [
     ButtonModule,
     CommonModule,
     ReactiveFormsModule,
     InputText,
-    ToggleSwitch,
     Button,
     Toast,
     ProgressBar,
@@ -48,58 +41,46 @@ import { AuthorModal } from '../author-modal/author-modal';
     TableModule,
     MultiSelectModule,
   ],
+  templateUrl: './author-modal.html',
+  styleUrl: './author-modal.css',
 })
-export class BookModal {
+export class AuthorModal {
   private ref: DynamicDialogRef = inject(DynamicDialogRef);
   modalController: DialogService = inject(DialogService);
-  private modalGenrRef!: DynamicDialogRef;
-  private modalAuthorRef!: DynamicDialogRef;
-
   private configDialog: DynamicDialogConfig<object> =
     inject(DynamicDialogConfig);
   private fb = inject(FormBuilder);
   private config: PrimeNG = inject(PrimeNG);
+  author: any | undefined;
   private messageService: MessageService = inject(MessageService);
   private confirmController: ConfirmationService = inject(ConfirmationService);
-  private authorService: AuthorsService = inject(AuthorsService);
-  private genresService: GenresService = inject(GenresService);
 
   step = signal<number>(0);
   steps: MenuItem[] | undefined;
   files!: File[];
   totalSize: number = 0;
   totalSizePercent: number = 0;
-  book: any | undefined;
   authors: any[] = [];
-  genres: any[] = [];
   selectedAuthors: any[] = [];
-  selectedGenres: any[] = [];
 
   form = this.fb.group({
-    title: ['EL ALQUIMISTA', Validators.required],
-    price: [20, Validators.required],
-    description: ['', Validators.required],
-    genres: [[], Validators.required],
-    authors: [[], Validators.required],
-    physicalEnable: [false],
+    name: ['EL ALQUIMISTA', Validators.required],
+    lastname: [20, Validators.required],
+    age: ['', Validators.required],
+    biography: ['', Validators.required],
+    nationality: ['', Validators.required],
   });
 
   uploadedFiles: any[] = [];
 
   ngOnInit(): void {
-    this.book = this.configDialog.data;
-    this.authors = this.authorService.authors.map((author) => ({
-      ...author,
-      fullName: `${author.name} ${author.lastname}`,
-    }));
-    this.genres = this.genresService.genres;
-    if (this.book) {
-      this.form.patchValue(this.book);
+    this.author = this.configDialog.data;
+    if (this.author) {
+      this.form.patchValue(this.author);
       this.uploadedFiles.push({
-        name: this.book.title,
-        objectURL: this.book.image,
+        name: this.author.name,
+        objectURL: this.author.image,
       });
-      this.selectedAuthors = this.book?.authors ?? [];
       this.uploadedFiles = this.uploadedFiles;
     }
 
@@ -199,90 +180,5 @@ export class BookModal {
   }
   changeStep(event: number) {
     this.steps![event].visible;
-  }
-  setSelectedAuthors() {
-    this.form.get('authors')?.patchValue(this.selectedAuthors as any);
-  }
-  onSearchAuthor(event: Event) {
-    const input = event.target as HTMLInputElement;
-  }
-  addNewGenre() {
-    this.modalGenrRef = this.modalController.open(GenreModal, {
-      width: '50%',
-      height: 'auto',
-      dismissableMask: false,
-      modal: true,
-      closable: true,
-    });
-
-    this.modalGenrRef.onClose.subscribe((result) => {
-      if (!result) this.modalGenrRef.destroy();
-    });
-  }
-
-  editGenre(genre: any, event: Event) {
-    event.stopPropagation();
-    this.modalGenrRef = this.modalController.open(GenreModal, {
-      width: '50%',
-      height: 'auto',
-      dismissableMask: false,
-      modal: true,
-      closable: true,
-      data: genre,
-    });
-
-    this.modalGenrRef.onClose.subscribe((result) => {
-      if (!result) this.modalGenrRef.destroy();
-      console.log(result);
-    });
-  }
-
-  addAuthor() {
-    this.modalAuthorRef = this.modalController.open(AuthorModal, {
-      width: '50%',
-      height: 'auto',
-      dismissableMask: false,
-      modal: true,
-    });
-
-    this.modalAuthorRef.onClose.subscribe((result) => {
-      if (!result) this.modalAuthorRef.destroy();
-    });
-  }
-
-  editAuthor(author: any, event: Event) {
-    event.stopPropagation();
-    this.modalAuthorRef = this.modalController.open(AuthorModal, {
-      width: '50%',
-      height: 'auto',
-      dismissableMask: false,
-      modal: true,
-      data: author,
-    });
-    this.modalAuthorRef.onClose.subscribe((result) => {
-      if (!result) this.modalAuthorRef.destroy();
-      if (result) {
-        console.log('Resultado del modal:', result);
-      }
-    });
-  }
-
-  disableBackgroundScroll() {
-    document.body.style.overflow = 'hidden';
-  }
-
-  enableBackgroundScroll() {
-    document.body.style.overflow = '';
-  }
-
-  onRemoveAll(kind: 'authors' | 'genres'): void {
-    if (kind === 'authors') {
-      this.selectedAuthors = [];
-      this.form.get('authors')?.reset();
-    }
-    if (kind === 'genres') {
-      this.selectedGenres = [];
-      this.form.get('genres')?.reset();
-    }
   }
 }
