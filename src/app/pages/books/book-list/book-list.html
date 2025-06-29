@@ -11,7 +11,7 @@
     emptyMessage=" "
   >
     <ng-template #header>
-      <div class="flex items-center gap-2">
+      <div class="flex justify-between gap-2">
         <p-selectbutton
           [(ngModel)]="layout"
           [options]="options"
@@ -31,6 +31,7 @@
           pButton
           icon="pi pi-plus"
           label="Agregar"
+          class="flex justify-items-end justify-self-end"
           (click)="addBook()"
         ></button>
       </div>
@@ -57,7 +58,7 @@
     </ng-template>
 
     <ng-template #grid let-items>
-      <div class="grid grid-cols-12 gap-4">
+      <div class="grid grid-cols-15 justify-items-center gap-4">
         @for (book of items; track $index) {
         <book-layout
           [isListLayout]="false"

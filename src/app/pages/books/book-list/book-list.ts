@@ -34,7 +34,7 @@ export default class BookList implements OnInit {
   modalController: DialogService = inject(DialogService);
   private ref!: DynamicDialogRef;
 
-  rows = 6;
+  rows = 20;
   first = 0;
   totalRecords = 0;
 
