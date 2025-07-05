@@ -8,7 +8,12 @@ import {
   QueryClient,
 } from '@tanstack/angular-query-experimental';
 import { routes } from './app.routes';
-import { provideHttpClient, withFetch } from '@angular/common/http';
+import {
+  provideHttpClient,
+  withFetch,
+  withInterceptors,
+} from '@angular/common/http';
+import { AuthenticationInterceptor } from '@core/AuthenticationInterceptor';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -16,7 +21,10 @@ export const appConfig: ApplicationConfig = {
     provideRouter(routes),
     provideAnimationsAsync(),
     provideHttpClient(withFetch()),
-    provideHttpClient(),
+    provideHttpClient(
+      withFetch(),
+      withInterceptors([AuthenticationInterceptor])
+    ),
     provideTanStackQuery(new QueryClient()),
     providePrimeNG({
       theme: {

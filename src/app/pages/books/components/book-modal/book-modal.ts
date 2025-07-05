@@ -25,6 +25,13 @@ import { GenresService } from '@pages/books/services/genres.service';
 import { MultiSelectModule } from 'primeng/multiselect';
 import { GenreModal } from '../genre-modal/genre-modal';
 import { AuthorModal } from '../author-modal/author-modal';
+import {
+  injectMutation,
+  injectQuery,
+  QueryClient,
+} from '@tanstack/angular-query-experimental';
+import { IGenre } from '@pages/books/interfaces/genre.interface';
+import { Genre } from '@pages/books/models/genre.model';
 
 @Component({
   selector: 'book-modal',
@@ -64,6 +71,11 @@ export class BookModal {
   private authorService: AuthorsService = inject(AuthorsService);
   private genresService: GenresService = inject(GenresService);
 
+  allGenres = injectQuery(() => ({
+    queryKey: ['genres'],
+    queryFn: () => this.genresService.getGenres(),
+  }));
+
   step = signal<number>(0);
   steps: MenuItem[] | undefined;
   files!: File[];
@@ -71,7 +83,6 @@ export class BookModal {
   totalSizePercent: number = 0;
   book: any | undefined;
   authors: any[] = [];
-  genres: any[] = [];
   selectedAuthors: any[] = [];
   selectedGenres: any[] = [];
 
@@ -92,7 +103,6 @@ export class BookModal {
       ...author,
       fullName: `${author.name} ${author.lastname}`,
     }));
-    this.genres = this.genresService.genres;
     if (this.book) {
       this.form.patchValue(this.book);
       this.uploadedFiles.push({
@@ -233,7 +243,6 @@ export class BookModal {
 
     this.modalGenrRef.onClose.subscribe((result) => {
       if (!result) this.modalGenrRef.destroy();
-      console.log(result);
     });
   }
 

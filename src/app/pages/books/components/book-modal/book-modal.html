@@ -40,7 +40,7 @@
       <label for="description">Description</label>
 
       <p-multiselect
-        [options]="genres"
+        [options]="allGenres.data()"
         formControlName="genres"
         placeholder="Select Some Genres"
         optionLabel="name"
