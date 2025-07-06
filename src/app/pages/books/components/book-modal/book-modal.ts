@@ -31,7 +31,12 @@ import {
   QueryClient,
 } from '@tanstack/angular-query-experimental';
 import { IGenre } from '@pages/books/interfaces/genre.interface';
-import { Genre } from '@pages/books/models/genre.model';
+import {
+  CreateBookDto,
+  CreateBookSchema,
+} from '@pages/books/dtos/create-book-dto';
+import { BooksService } from '@pages/books/services/books.service';
+import { AuthenticationService } from 'src/app/authentication/authentication.service';
 
 @Component({
   selector: 'book-modal',
@@ -66,14 +71,26 @@ export class BookModal {
     inject(DynamicDialogConfig);
   private fb = inject(FormBuilder);
   private config: PrimeNG = inject(PrimeNG);
-  private messageService: MessageService = inject(MessageService);
+  private msgService: MessageService = inject(MessageService);
   private confirmController: ConfirmationService = inject(ConfirmationService);
   private authorService: AuthorsService = inject(AuthorsService);
   private genresService: GenresService = inject(GenresService);
+  private bookService: BooksService = inject(BooksService);
+  private queryClient = inject(QueryClient);
+  private readonly auth = inject(AuthenticationService);
 
   allGenres = injectQuery(() => ({
     queryKey: ['genres'],
     queryFn: () => this.genresService.getGenres(),
+  }));
+
+  allAuthors = injectQuery(() => ({
+    queryKey: ['authors'],
+    queryFn: async () =>
+      (await this.authorService.getAuthors()).map((author) => ({
+        ...author,
+        fullName: `${author.name} ${author.lastname}`,
+      })),
   }));
 
   step = signal<number>(0);
@@ -85,31 +102,50 @@ export class BookModal {
   authors: any[] = [];
   selectedAuthors: any[] = [];
   selectedGenres: any[] = [];
+  isEditing: boolean = false;
 
   form = this.fb.group({
-    title: ['EL ALQUIMISTA', Validators.required],
-    price: [20, Validators.required],
-    description: ['', Validators.required],
-    genres: [[], Validators.required],
-    authors: [[], Validators.required],
-    physicalEnable: [false],
+    title: [<string>'', Validators.required],
+    price: [<number>0, Validators.required],
+    description: [<string>'', Validators.required],
+    authors: [<string[]>[], Validators.required],
+    genres: [<string[]>[], Validators.required],
+    physical_enable: [false],
   });
+
+  mutation = injectMutation(() => ({
+    mutationFn: async (dto: CreateBookDto) =>
+      await this.bookService.addBook(dto),
+    onSuccess: () => {
+      this.msgService.add({
+        severity: 'success',
+        summary: 'Success',
+        detail: 'Book was created successfully',
+        life: 3000,
+      });
+      this.queryClient.invalidateQueries({ queryKey: ['books'] });
+    },
+    onError: (error) => {
+      this.msgService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: `Error al guardar: ${error.message}`,
+        life: 3000,
+      });
+    },
+  }));
 
   uploadedFiles: any[] = [];
 
   ngOnInit(): void {
     this.book = this.configDialog.data;
-    this.authors = this.authorService.authors.map((author) => ({
-      ...author,
-      fullName: `${author.name} ${author.lastname}`,
-    }));
     if (this.book) {
       this.form.patchValue(this.book);
       this.uploadedFiles.push({
         name: this.book.title,
         objectURL: this.book.image,
       });
-      this.selectedAuthors = this.book?.authors ?? [];
+      this.selectedAuthors = this.book?.authors;
       this.uploadedFiles = this.uploadedFiles;
     }
 
@@ -125,8 +161,30 @@ export class BookModal {
     ];
   }
 
-  submit() {
-    console.log(this.form.value);
+  async submit() {
+    if (this.form.valid) {
+      console.log(this.form.value);
+      const result = CreateBookSchema.safeParse({
+        ...this.form.value,
+        created_by: this.auth.getAuthenticatedUser(),
+      } as CreateBookDto);
+      if (!result.success) {
+        result.error.errors.map((err) =>
+          this.msgService.add({
+            key: err.code,
+            severity: 'error',
+            summary: 'Error',
+            detail: `Error al guardar: ${err.message}`,
+            life: 3000,
+          })
+        );
+      }
+      if (this.isEditing) {
+      } else {
+        await this.mutation.mutateAsync(result.data!);
+      }
+      this.ref.close();
+    }
   }
   choose(event: Event, callback: CallableFunction) {
     callback();
@@ -150,7 +208,7 @@ export class BookModal {
   }
 
   onTemplatedUpload() {
-    this.messageService.add({
+    this.msgService.add({
       severity: 'info',
       summary: 'Success',
       detail: 'File Uploaded',

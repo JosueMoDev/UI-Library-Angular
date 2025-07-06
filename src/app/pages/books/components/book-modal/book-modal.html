@@ -44,6 +44,7 @@
         formControlName="genres"
         placeholder="Select Some Genres"
         optionLabel="name"
+        optionValue="id"
         styleClass="w-full mb-10"
         display="chip"
         [maxSelectedLabels]="8"
@@ -96,11 +97,12 @@
       </p-multiselect>
 
       <p-multiselect
-        [options]="authors"
+        [options]="allAuthors.data()"
         formControlName="authors"
         placeholder="Select Some Authors"
         styleClass="w-full mb-10"
         optionLabel="fullName"
+        optionValue="id"
         display="chip"
         [maxSelectedLabels]="6"
         [appendTo]="'body'"
@@ -120,7 +122,7 @@
                   object-fit: cover;
                 "
               />
-              <span class="font-medium text-base">{{ author.fullName }}</span>
+              <span class="font-medium text-base">{{ author.fullName}}</span>
             </div>
 
             <p-button
@@ -166,7 +168,7 @@
 
       <div class="flex items-center gap-2">
         <label for="physical">Compra física</label>
-        <p-toggleswitch formControlName="physicalEnable" inputId="physical" />
+        <p-toggleswitch formControlName="physical_enable" inputId="physical" />
       </div>
     </div>
     } @if (step() === 1) {

@@ -23,6 +23,7 @@
         label="Guardar"
         type="submit"
         severity="success"
+        [loading]="mutation.isPending()"
         [disabled]="form.invalid"
       />
     </div>

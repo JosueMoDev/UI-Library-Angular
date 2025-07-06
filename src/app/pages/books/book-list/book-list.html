@@ -33,6 +33,8 @@
           label="Agregar"
           class="flex justify-items-end justify-self-end"
           (click)="addBook()"
+          [loading]="allBooks.isLoading()"
+          [disabled]="allBooks.isPending()"
         ></button>
       </div>
     </ng-template>

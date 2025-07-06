@@ -3,10 +3,10 @@ import { IGenre } from './genre.interface';
 
 export interface IBook {
   id: string;
-  createdAt: Date;
+  created_at: Date;
   title: string;
   description: string;
-  canGetPhysical: boolean;
+  physical_enable: boolean;
   price: number;
   downloads: number;
   stars: number;

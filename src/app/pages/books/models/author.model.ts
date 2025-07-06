@@ -3,27 +3,27 @@ import type { AuthorEnum, IAuthor } from '../interfaces/author.interface';
 export class Author implements IAuthor {
   constructor(
     public id: string,
-    public createdAt: Date,
+    public created_at: Date,
     public name: string,
-    public lastName: string,
+    public lastname: string,
     public age: number,
     public gender: AuthorEnum,
     public biography: string,
-    public updatedAt?: Date,
-    public profilePictureUrl?: string
+    public updated_at?: Date,
+    public profile_picture?: string
   ) {}
 
   static fromResponseToAuthor(data: IAuthor): Author {
     return {
       id: data.id,
-      createdAt: new Date(data.createdAt),
+      created_at: new Date(data.created_at),
       name: data.name,
-      lastName: data.lastName,
+      lastname: data.lastname,
       age: data.age,
       gender: data.gender,
       biography: data.biography,
-      updatedAt: data.updatedAt ? new Date(data.updatedAt) : undefined,
-      profilePictureUrl: data.profilePictureUrl,
+      updated_at: data.updated_at ? new Date(data.updated_at) : undefined,
+      profile_picture: data.profile_picture,
     };
   }
 }

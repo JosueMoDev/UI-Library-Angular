@@ -9,6 +9,7 @@ import { DialogService, DynamicDialogRef } from 'primeng/dynamicdialog';
 import { BookModal } from '../components/book-modal/book-modal';
 import { SkeletonBook } from '@pages/books/components/skeleton-book/skeleton-book';
 import { ButtonModule } from 'primeng/button';
+import { injectQuery } from '@tanstack/angular-query-experimental';
 
 @Component({
   selector: 'books-list',
@@ -29,7 +30,10 @@ export default class BookList implements OnInit {
   layout: any = 'grid';
   books = signal<any>([]);
   options = ['list', 'grid'];
-
+  allBooks = injectQuery(() => ({
+    queryKey: ['books'],
+    queryFn: async () => await this.booksService.allBooks(),
+  }));
   booksService = inject(BooksService);
   modalController: DialogService = inject(DialogService);
   private ref!: DynamicDialogRef;
@@ -38,7 +42,7 @@ export default class BookList implements OnInit {
   first = 0;
   totalRecords = 0;
 
-  ngOnInit() {
+  async ngOnInit() {
     const booksArray = this.booksService.Books;
     setInterval(() => {
       this.books.set(booksArray);

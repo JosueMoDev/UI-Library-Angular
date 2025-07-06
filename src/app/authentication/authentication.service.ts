@@ -5,6 +5,16 @@ import { SupabaseService } from '@core/Supabase.service';
   providedIn: 'root',
 })
 export class AuthenticationService {
+  addGenre(dto: {
+    name: string;
+    lastname: string;
+    age: number;
+    biography: string;
+    nationality: string;
+    created_by: string;
+  }): any {
+    throw new Error('Method not implemented.');
+  }
   private supabaseService: SupabaseService = inject(SupabaseService);
   private token: string | undefined;
   private authenticatedUser!: string | null;

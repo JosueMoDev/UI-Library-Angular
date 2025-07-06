@@ -8,7 +8,6 @@ import { DialogService } from 'primeng/dynamicdialog';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { AuthenticationService } from './authentication/authentication.service';
 import { ToastModule } from 'primeng/toast';
-
 @Component({
   selector: 'app-root',
   imports: [
@@ -24,6 +23,8 @@ import { ToastModule } from 'primeng/toast';
 })
 export class AppComponent {
   auth = inject(AuthenticationService);
+  msgService = inject(MessageService);
+
   private readonly appService: AppService = inject(AppService);
   async ngOnInit() {
     await this.auth.signInWithCredentials();

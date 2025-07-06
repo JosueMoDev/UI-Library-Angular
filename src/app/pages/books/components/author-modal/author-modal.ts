@@ -13,7 +13,6 @@ import { Badge } from 'primeng/badge';
 import { CommonModule } from '@angular/common';
 import { Steps } from 'primeng/steps';
 import { ConfirmationService, MenuItem, MessageService } from 'primeng/api';
-import { ToggleSwitch } from 'primeng/toggleswitch';
 import { FileUpload } from 'primeng/fileupload';
 import { PrimeNG } from 'primeng/config';
 import { Card } from 'primeng/card';
@@ -21,6 +20,16 @@ import { ConfirmDialog } from 'primeng/confirmdialog';
 import { IconFieldModule } from 'primeng/iconfield';
 import { TableModule } from 'primeng/table';
 import { MultiSelectModule } from 'primeng/multiselect';
+import {
+  CreateAuthorDto,
+  CreateAuthorSchema,
+} from '@pages/books/dtos/create-author.dto';
+import { AuthenticationService } from 'src/app/authentication/authentication.service';
+import {
+  injectMutation,
+  QueryClient,
+} from '@tanstack/angular-query-experimental';
+import { AuthorsService } from '@pages/books/services/authors.service';
 
 @Component({
   selector: 'app-author-modal',
@@ -51,9 +60,14 @@ export class AuthorModal {
     inject(DynamicDialogConfig);
   private fb = inject(FormBuilder);
   private config: PrimeNG = inject(PrimeNG);
-  author: any | undefined;
-  private messageService: MessageService = inject(MessageService);
+  private msgService: MessageService = inject(MessageService);
+  private readonly auth = inject(AuthenticationService);
   private confirmController: ConfirmationService = inject(ConfirmationService);
+  private authorService = inject(AuthorsService);
+  private queryClient = inject(QueryClient);
+
+  author: any | undefined;
+  isEditing: boolean = false;
 
   step = signal<number>(0);
   steps: MenuItem[] | undefined;
@@ -64,18 +78,41 @@ export class AuthorModal {
   selectedAuthors: any[] = [];
 
   form = this.fb.group({
-    name: ['EL ALQUIMISTA', Validators.required],
-    lastname: [20, Validators.required],
+    name: ['', Validators.required],
+    lastname: ['', Validators.required],
     age: ['', Validators.required],
     biography: ['', Validators.required],
-    nationality: ['', Validators.required],
+    // nationality: ['', Validators.required],
   });
+
+  mutation = injectMutation(() => ({
+    mutationFn: async (dto: CreateAuthorDto) =>
+      await this.authorService.addAuthor(dto),
+    onSuccess: () => {
+      this.msgService.add({
+        severity: 'success',
+        summary: 'Success',
+        detail: 'Author was created successfully',
+        life: 3000,
+      });
+      this.queryClient.invalidateQueries({ queryKey: ['authors'] });
+    },
+    onError: (error) => {
+      this.msgService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: `Error al guardar: ${error.message}`,
+        life: 3000,
+      });
+    },
+  }));
 
   uploadedFiles: any[] = [];
 
   ngOnInit(): void {
     this.author = this.configDialog.data;
     if (this.author) {
+      this.isEditing = true;
       this.form.patchValue(this.author);
       this.uploadedFiles.push({
         name: this.author.name,
@@ -96,8 +133,29 @@ export class AuthorModal {
     ];
   }
 
-  submit() {
-    console.log(this.form.value);
+  async submit() {
+    if (this.form.valid) {
+      const result = CreateAuthorSchema.safeParse({
+        ...this.form.value,
+        created_by: this.auth.getAuthenticatedUser(),
+      });
+      if (!result.success) {
+        result.error.errors.map((err) =>
+          this.msgService.add({
+            key: err.code,
+            severity: 'error',
+            summary: 'Error',
+            detail: `Error al guardar: ${err.message}`,
+            life: 3000,
+          })
+        );
+      }
+      if (this.isEditing) {
+      } else {
+        await this.mutation.mutateAsync(result.data!);
+      }
+      this.ref.close();
+    }
   }
   choose(event: Event, callback: CallableFunction) {
     callback();
@@ -121,7 +179,7 @@ export class AuthorModal {
   }
 
   onTemplatedUpload() {
-    this.messageService.add({
+    this.msgService.add({
       severity: 'info',
       summary: 'Success',
       detail: 'File Uploaded',

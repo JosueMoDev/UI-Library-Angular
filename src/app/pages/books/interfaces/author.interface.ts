@@ -4,12 +4,12 @@ export enum AuthorEnum {
 }
 export interface IAuthor {
   id: string;
-  createdAt: Date;
-  updatedAt?: Date;
   name: string;
-  lastName: string;
+  created_at: Date;
   age: number;
+  lastname: string;
   gender: AuthorEnum;
-  profilePictureUrl?: string;
   biography: string;
+  updated_at?: Date;
+  profile_picture?: string;
 }

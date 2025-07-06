@@ -1,51 +1,50 @@
 import { Component, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import {
-  CreateGenreDto,
-  CreateGenreSchema,
-} from '@pages/books/dtos/create-genre.dto';
-import { IGenre } from '@pages/books/interfaces/genre.interface';
-import { GenresService } from '@pages/books/services/genres.service';
-import {
-  injectMutation,
-  QueryClient,
-} from '@tanstack/angular-query-experimental';
 import { MessageService } from 'primeng/api';
 import { Button } from 'primeng/button';
 import { Card } from 'primeng/card';
 import { DynamicDialogConfig, DynamicDialogRef } from 'primeng/dynamicdialog';
 import { InputText } from 'primeng/inputtext';
-import { ToastModule } from 'primeng/toast';
-import { AuthenticationService } from 'src/app/authentication/authentication.service';
+import {
+  injectMutation,
+  QueryClient,
+} from '@tanstack/angular-query-experimental';
 
+import {
+  CreateGenreDto,
+  CreateGenreSchema,
+} from '@pages/books/dtos/create-genre.dto';
+import { GenresService } from '@pages/books/services/genres.service';
+import { AuthenticationService } from 'src/app/authentication/authentication.service';
 @Component({
   selector: 'genre-modal',
-  imports: [Button, Card, ReactiveFormsModule, InputText, ToastModule],
+  imports: [Button, Card, ReactiveFormsModule, InputText],
   templateUrl: './genre-modal.html',
   styleUrl: './genre-modal.css',
-  providers: [MessageService],
 })
 export class GenreModal {
-  private ref: DynamicDialogRef = inject(DynamicDialogRef);
+  private readonly ref: DynamicDialogRef = inject(DynamicDialogRef);
   private genreService: GenresService = inject(GenresService);
   queryClient = inject(QueryClient);
   private fb = inject(FormBuilder);
   private readonly auth = inject(AuthenticationService);
-  private msgService = inject(MessageService);
-  private configDialog: DynamicDialogConfig<object> =
+  private readonly msgService = inject(MessageService);
+  private readonly configDialog: DynamicDialogConfig<object> =
     inject(DynamicDialogConfig);
+  isEditing: boolean = false;
 
   private genre = this.configDialog.data;
   mutation = injectMutation(() => ({
-    mutationFn: (dto: CreateGenreDto) => this.genreService.addGenre(dto),
-    onSuccess: (genre) => {
+    mutationFn: async (dto: CreateGenreDto) =>
+      await this.genreService.addGenre(dto),
+    onSuccess: () => {
       this.msgService.add({
         severity: 'success',
         summary: 'Success',
         detail: 'Genre was created successfully',
         life: 3000,
       });
-      this.ref.close({ result: genre });
+      this.queryClient.invalidateQueries({ queryKey: ['genres'] });
     },
     onError: (error) => {
       this.msgService.add({
@@ -64,6 +63,7 @@ export class GenreModal {
 
   ngOnInit(): void {
     if (this.genre) {
+      this.isEditing = true;
       this.form.patchValue(this.genre);
     }
   }
@@ -77,6 +77,7 @@ export class GenreModal {
       if (!result.success) {
         result.error.errors.map((err) =>
           this.msgService.add({
+            key: err.code,
             severity: 'error',
             summary: 'Error',
             detail: `Error al guardar: ${err.message}`,
@@ -84,9 +85,11 @@ export class GenreModal {
           })
         );
       }
-
-      this.mutation.mutate(result.data!);
-      this.ref.close({ result: { ...this.form.value } });
+      if (this.isEditing) {
+      } else {
+        await this.mutation.mutateAsync(result.data!);
+      }
+      this.ref.close();
     }
   }
 }

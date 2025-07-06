@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { SupabaseService } from '@core/Supabase.service';
 import { IGenre } from '../interfaces/genre.interface';
 import { SupabaseClient } from '@supabase/supabase-js';
@@ -10,13 +10,8 @@ import { CreateGenreDto } from '../dtos/create-genre.dto';
   providedIn: 'root',
 })
 export class GenresService {
-  supabase!: SupabaseClient;
-  constructor(
-    private supabaseService: SupabaseService,
-    private auth: AuthenticationService
-  ) {
-    this.supabase = this.supabaseService.supabase;
-  }
+  private supabaseService = inject(SupabaseService);
+  private supabase: SupabaseClient = this.supabaseService.supabase;
 
   async addGenre(genre: CreateGenreDto): Promise<IGenre> {
     const { data, error } = await this.supabase
@@ -34,7 +29,6 @@ export class GenresService {
     if (error) {
       throw new Error(error.message);
     }
-    console.log(data);
     return data;
   }
 }

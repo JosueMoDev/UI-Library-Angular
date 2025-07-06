@@ -1,7 +1,7 @@
 export interface IGenre {
   id: string;
-  createdAt: Date;
-  updatedAt?: Date;
+  created_at: Date;
+  updated_at?: Date;
   name: string;
   description: string;
 }
