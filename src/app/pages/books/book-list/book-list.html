@@ -1,9 +1,9 @@
 <div class="card">
   <p-dataview
     #dv
-    [value]="books()"
+    [value]="allBooks.data()"
     [layout]="layout"
-    [paginator]="!!books().length"
+    [paginator]="!!allBooks.data()"
     [rows]="rows"
     [totalRecords]="totalRecords"
     [first]="first"

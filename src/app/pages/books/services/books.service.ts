@@ -69,32 +69,32 @@ export class BooksService {
     return book;
   }
 
-  async allBooks() {
+  async allBooks(): Promise<Book[]> {
     const { data, error } = await this.supabase.from('Books').select(`
-      *,
-      AuthorsBook (
-        Authors (
-          *
+        *,
+        AuthorsBook (
+          Authors (
+            *
+          )
+        ),
+        GenresBook (
+          Genres (
+            *
+          )
         )
-      ),
-      GenresBook (
-        Genres (
-          *
-        )
-      )
-    `);
+      `);
 
     if (error) throw new Error(error.message);
-    // todo: mejorar esto
-    // const mappedRs = data.map(({ AuthorsBook, GenresBook, ...book }) =>
-    //   Book.fromResponseToBook({
-    //     ...book,
-    //     authors: AuthorsBook,
-    //     genres: GenresBook,
-    //   })
-    // );
-    // console.log(mappedRs);
-    console.log(data);
-    return data;
+    if (!data) return [];
+
+    const mappedBooks = data.map(({ AuthorsBook, GenresBook, ...book }) =>
+      Book.fromResponseToBook({
+        ...book,
+        authors: AuthorsBook,
+        genres: GenresBook,
+      })
+    );
+
+    return mappedBooks;
   }
 }

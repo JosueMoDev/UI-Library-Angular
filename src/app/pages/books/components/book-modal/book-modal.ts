@@ -37,6 +37,7 @@ import {
 } from '@pages/books/dtos/create-book-dto';
 import { BooksService } from '@pages/books/services/books.service';
 import { AuthenticationService } from 'src/app/authentication/authentication.service';
+import { IAuthor } from '@pages/books/interfaces/author.interface';
 
 @Component({
   selector: 'book-modal',
@@ -139,13 +140,17 @@ export class BookModal {
 
   ngOnInit(): void {
     this.book = this.configDialog.data;
+    console.log(this.book);
     if (this.book) {
-      this.form.patchValue(this.book);
+      this.form.patchValue({
+        ...this.book,
+        authors: this.book?.authors.map(({ id }: IAuthor) => id),
+        genres: this.book.genres.map(({ id }: IGenre) => id),
+      });
       this.uploadedFiles.push({
         name: this.book.title,
         objectURL: this.book.image,
       });
-      this.selectedAuthors = this.book?.authors;
       this.uploadedFiles = this.uploadedFiles;
     }
 

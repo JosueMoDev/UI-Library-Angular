@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit, input } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { DataView } from 'primeng/dataview';
 import { CommonModule } from '@angular/common';
 import { BooksService } from '@pages/books/services/books.service';
@@ -28,12 +28,7 @@ import { injectQuery } from '@tanstack/angular-query-experimental';
 })
 export default class BookList implements OnInit {
   layout: any = 'grid';
-  books = signal<any>([]);
   options = ['list', 'grid'];
-  allBooks = injectQuery(() => ({
-    queryKey: ['books'],
-    queryFn: async () => await this.booksService.allBooks(),
-  }));
   booksService = inject(BooksService);
   modalController: DialogService = inject(DialogService);
   private ref!: DynamicDialogRef;
@@ -42,13 +37,13 @@ export default class BookList implements OnInit {
   first = 0;
   totalRecords = 0;
 
-  async ngOnInit() {
-    const booksArray = this.booksService.Books;
-    setInterval(() => {
-      this.books.set(booksArray);
-      this.totalRecords = booksArray.length;
-    }, 7000);
-  }
+  allBooks = injectQuery(() => ({
+    queryKey: ['books'],
+    queryFn: () => this.booksService.allBooks(),
+    refetchOnMount: true,
+  }));
+
+  async ngOnInit() {}
 
   onPageChange(event: any) {
     this.first = event.first;

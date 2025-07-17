@@ -72,10 +72,10 @@
 
       <!-- Best Seller Badge -->
       <div
-        *ngIf="book().sales > 50"
+        *ngIf="book().total_sales === 0"
         class="absolute top-8 left-[-30px] rotate-[-45deg] bg-green-400 text-black font-bold text-[12px] tracking-wider px-0 py-[2px] shadow-md w-[150px] text-center overflow-hidden text-ellipsis whitespace-nowrap"
       >
-        recomended
+        new
       </div>
     </div>
 
@@ -88,16 +88,16 @@
 
       <div class="mt-3 flex flex-wrap gap-2">
         <span class="text-white px-3 text-xs font-medium">
-          {{ book().authors.join(', ') }}
+          {{ getAuthors() }}
         </span>
       </div>
       <!-- Categorías en gris -->
       <div class="mt-3 flex flex-wrap gap-2">
         <span
-          *ngFor="let cat of book().categories"
+          *ngFor="let genre of book().genres"
           class="bg-gray-500 dark:bg-gray-700 text-white px-3 py-1 text-xs font-medium rounded-full"
         >
-          {{ cat }}
+          {{ genre.name }}
         </span>
       </div>
       <div
@@ -106,7 +106,7 @@
         <!-- Estrellas -->
         <div class="flex items-center gap-1 text-yellow-500">
           <i class="pi pi-star-fill"></i>
-          <span>{{ book().rating }} / 5</span>
+          <span>{{ book().stars }}</span>
         </div>
 
         <!-- Ventas -->

@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, HostBinding, input } from '@angular/core';
+import { IAuthor } from '@pages/books/interfaces/author.interface';
 import { Tag } from 'primeng/tag';
 
 @Component({
@@ -23,5 +24,11 @@ export class BookLayout {
 
   showBook(book: any) {
     console.log('Selected book:', book);
+  }
+
+  getAuthors() {
+    return this.book()
+      .authors.map((author: IAuthor) => author.name)
+      .join(', ');
   }
 }

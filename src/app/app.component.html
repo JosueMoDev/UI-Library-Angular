@@ -1,3 +1,4 @@
+@if(this.auth.getBearerToken()){
 <sidebar-componet />
 <div
   class="transition-all duration-300"
@@ -7,3 +8,4 @@
   <p-toast position="top-right"></p-toast>
   <router-outlet />
 </div>
+}

@@ -18,7 +18,7 @@ export class Book implements IBook {
     public authors: IAuthor[],
     public genres: IGenre[],
     public stock: number,
-    public totalSales: number,
+    public total_sales: number,
     public digitalFileUrl?: string,
     public updatedAt?: Date,
     public coverUrl?: string
@@ -43,8 +43,8 @@ export class Book implements IBook {
       genres: data.genres.map(({ Genres }: any) =>
         Genre.fromResponseToGenre(Genres)
       ),
-      stock: data.stock,
-      totalSales: data.totalSales,
+      stock: data.stock ?? 0,
+      total_sales: data.total_sales ?? 0,
       updatedAt: data.updatedAt ? new Date(data.updatedAt) : undefined,
       coverUrl: data.coverUrl,
     };

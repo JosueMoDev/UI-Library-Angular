@@ -14,7 +14,7 @@ export interface IBook {
   authors: IAuthor[];
   genres: IGenre[];
   stock: number;
-  totalSales: number;
+  total_sales: number;
   updatedAt?: Date;
   coverUrl?: string;
   digitalFileUrl?: string;
