@@ -30,6 +30,11 @@ import {
   QueryClient,
 } from '@tanstack/angular-query-experimental';
 import { AuthorsService } from '@pages/books/services/authors.service';
+import {
+  UpdateAuthorDto,
+  UpdateAuthorSchema,
+} from '@pages/books/dtos/update-author.dto';
+import { Author } from '@pages/books/models/author.model';
 
 @Component({
   selector: 'app-author-modal',
@@ -66,7 +71,7 @@ export class AuthorModal {
   private authorService = inject(AuthorsService);
   private queryClient = inject(QueryClient);
 
-  author: any | undefined;
+  author: Author | undefined;
   isEditing: boolean = false;
 
   step = signal<number>(0);
@@ -80,12 +85,12 @@ export class AuthorModal {
   form = this.fb.group({
     name: ['', Validators.required],
     lastname: ['', Validators.required],
-    age: ['', Validators.required],
+    age: [0, Validators.required],
     biography: ['', Validators.required],
     // nationality: ['', Validators.required],
   });
 
-  mutation = injectMutation(() => ({
+  createMutation = injectMutation(() => ({
     mutationFn: async (dto: CreateAuthorDto) =>
       await this.authorService.addAuthor(dto),
     onSuccess: () => {
@@ -107,16 +112,38 @@ export class AuthorModal {
     },
   }));
 
+  updateMutation = injectMutation(() => ({
+    mutationFn: async (dto: UpdateAuthorDto) =>
+      await this.authorService.updateAuthor(dto),
+    onSuccess: () => {
+      this.msgService.add({
+        severity: 'success',
+        summary: 'Success',
+        detail: 'Author was updated successfully',
+        life: 3000,
+      });
+      this.queryClient.invalidateQueries({ queryKey: ['authors'] });
+    },
+    onError: (error) => {
+      this.msgService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: `Error al actualizar: ${error.message}`,
+        life: 3000,
+      });
+    },
+  }));
+
   uploadedFiles: any[] = [];
 
   ngOnInit(): void {
-    this.author = this.configDialog.data;
+    this.author = this.configDialog.data as Author;
     if (this.author) {
       this.isEditing = true;
       this.form.patchValue(this.author);
       this.uploadedFiles.push({
         name: this.author.name,
-        objectURL: this.author.image,
+        objectURL: this.author.profile_picture_url,
       });
       this.uploadedFiles = this.uploadedFiles;
     }
@@ -135,26 +162,46 @@ export class AuthorModal {
 
   async submit() {
     if (this.form.valid) {
-      const result = CreateAuthorSchema.safeParse({
-        ...this.form.value,
-        created_by: this.auth.getAuthenticatedUser(),
-      });
-      if (!result.success) {
-        result.error.errors.map((err) =>
-          this.msgService.add({
-            key: err.code,
-            severity: 'error',
-            summary: 'Error',
-            detail: `Error al guardar: ${err.message}`,
-            life: 3000,
-          })
-        );
+      if (this.isEditing && this.author) {
+        const result = UpdateAuthorSchema.safeParse({
+          id: this.author.id,
+          ...this.form.value,
+          updated_by: this.auth.getAuthenticatedUser(),
+        });
+        if (!result.success) {
+          result.error.errors.map((err) =>
+            this.msgService.add({
+              key: err.code,
+              severity: 'error',
+              summary: 'Error',
+              detail: `Error al Editar: ${err.message}`,
+              life: 3000,
+            })
+          );
+        }
+        await this.updateMutation.mutateAsync(result.data!);
+        this.ref.close();
       }
-      if (this.isEditing) {
-      } else {
-        await this.mutation.mutateAsync(result.data!);
+
+      if (!this.isEditing) {
+        const result = CreateAuthorSchema.safeParse({
+          ...this.form.value,
+          created_by: this.auth.getAuthenticatedUser(),
+        });
+        if (!result.success) {
+          result.error.errors.map((err) =>
+            this.msgService.add({
+              key: err.code,
+              severity: 'error',
+              summary: 'Error',
+              detail: `Error al guardar: ${err.message}`,
+              life: 3000,
+            })
+          );
+        }
+        await this.createMutation.mutateAsync(result.data!);
+        this.ref.close();
       }
-      this.ref.close();
     }
   }
   choose(event: Event, callback: CallableFunction) {

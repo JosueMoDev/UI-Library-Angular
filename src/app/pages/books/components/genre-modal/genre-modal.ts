@@ -16,6 +16,11 @@ import {
 } from '@pages/books/dtos/create-genre.dto';
 import { GenresService } from '@pages/books/services/genres.service';
 import { AuthenticationService } from 'src/app/authentication/authentication.service';
+import {
+  UpdateGenreDto,
+  UpdateGenreSchema,
+} from '@pages/books/dtos/update-genre.dto';
+import { Genre } from '@pages/books/models/genre.model';
 @Component({
   selector: 'genre-modal',
   imports: [Button, Card, ReactiveFormsModule, InputText],
@@ -33,8 +38,8 @@ export class GenreModal {
     inject(DynamicDialogConfig);
   isEditing: boolean = false;
 
-  private genre = this.configDialog.data;
-  mutation = injectMutation(() => ({
+  private genre: Genre | undefined;
+  createMutation = injectMutation(() => ({
     mutationFn: async (dto: CreateGenreDto) =>
       await this.genreService.addGenre(dto),
     onSuccess: () => {
@@ -56,12 +61,35 @@ export class GenreModal {
     },
   }));
 
+  updateMutation = injectMutation(() => ({
+    mutationFn: async (dto: UpdateGenreDto) =>
+      await this.genreService.updateGenre(dto),
+    onSuccess: () => {
+      this.msgService.add({
+        severity: 'success',
+        summary: 'Success',
+        detail: 'Genre was update successfully',
+        life: 3000,
+      });
+      this.queryClient.invalidateQueries({ queryKey: ['genres'] });
+    },
+    onError: (error) => {
+      this.msgService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: `Error al editar: ${error.message}`,
+        life: 3000,
+      });
+    },
+  }));
+
   form = this.fb.group({
     name: ['', Validators.required],
     description: ['', Validators.required],
   });
 
   ngOnInit(): void {
+    this.genre = this.configDialog.data as Genre;
     if (this.genre) {
       this.isEditing = true;
       this.form.patchValue(this.genre);
@@ -70,26 +98,45 @@ export class GenreModal {
 
   async submit() {
     if (this.form.valid) {
-      const result = CreateGenreSchema.safeParse({
-        ...this.form.value,
-        created_by: this.auth.getAuthenticatedUser(),
-      } as CreateGenreDto);
-      if (!result.success) {
-        result.error.errors.map((err) =>
-          this.msgService.add({
-            key: err.code,
-            severity: 'error',
-            summary: 'Error',
-            detail: `Error al guardar: ${err.message}`,
-            life: 3000,
-          })
-        );
+      if (this.isEditing && this.genre) {
+        const result = UpdateGenreSchema.safeParse({
+          id: this.genre.id,
+          ...this.form.value,
+          updated_by: this.auth.getAuthenticatedUser(),
+        } as UpdateGenreDto);
+        if (!result.success) {
+          result.error.errors.map((err) =>
+            this.msgService.add({
+              key: err.code,
+              severity: 'error',
+              summary: 'Error',
+              detail: `Error al guardar: ${err.message}`,
+              life: 3000,
+            })
+          );
+        }
+        await this.updateMutation.mutateAsync(result.data!);
+        this.ref.close();
       }
-      if (this.isEditing) {
-      } else {
-        await this.mutation.mutateAsync(result.data!);
+      if (!this.isEditing) {
+        const result = CreateGenreSchema.safeParse({
+          ...this.form.value,
+          created_by: this.auth.getAuthenticatedUser(),
+        } as CreateGenreDto);
+        if (!result.success) {
+          result.error.errors.map((err) =>
+            this.msgService.add({
+              key: err.code,
+              severity: 'error',
+              summary: 'Error',
+              detail: `Error al guardar: ${err.message}`,
+              life: 3000,
+            })
+          );
+        }
+        await this.createMutation.mutateAsync(result.data!);
+        this.ref.close();
       }
-      this.ref.close();
     }
   }
 }

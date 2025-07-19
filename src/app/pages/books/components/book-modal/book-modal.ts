@@ -87,11 +87,7 @@ export class BookModal {
 
   allAuthors = injectQuery(() => ({
     queryKey: ['authors'],
-    queryFn: async () =>
-      (await this.authorService.getAuthors()).map((author) => ({
-        ...author,
-        fullName: `${author.name} ${author.lastname}`,
-      })),
+    queryFn: async () => await this.authorService.getAuthors(),
   }));
 
   step = signal<number>(0);
@@ -140,7 +136,6 @@ export class BookModal {
 
   ngOnInit(): void {
     this.book = this.configDialog.data;
-    console.log(this.book);
     if (this.book) {
       this.form.patchValue({
         ...this.book,

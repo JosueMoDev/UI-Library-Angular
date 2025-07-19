@@ -94,7 +94,6 @@ export class BooksService {
         genres: GenresBook,
       })
     );
-
     return mappedBooks;
   }
 }

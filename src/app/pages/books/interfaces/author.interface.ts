@@ -10,6 +10,7 @@ export interface IAuthor {
   lastname: string;
   gender: AuthorEnum;
   biography: string;
+  fullName: string;
   updated_at?: Date;
-  profile_picture?: string;
+  profile_picture_url?: string;
 }

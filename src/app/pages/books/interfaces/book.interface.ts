@@ -16,6 +16,6 @@ export interface IBook {
   stock: number;
   total_sales: number;
   updatedAt?: Date;
-  coverUrl?: string;
+  cover_url?: string;
   digitalFileUrl?: string;
 }

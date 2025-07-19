@@ -21,7 +21,7 @@ export class Book implements IBook {
     public total_sales: number,
     public digitalFileUrl?: string,
     public updatedAt?: Date,
-    public coverUrl?: string
+    public cover_url?: string
   ) {}
 
   static fromResponseToBook(data: IBook): Book {
@@ -36,7 +36,7 @@ export class Book implements IBook {
       downloads: data.downloads,
       stars: data.stars,
       lenguages: data.lenguages,
-      // TODO HAY que pulir tema de mapper
+
       authors: data.authors.map(({ Authors }: any) =>
         Author.fromResponseToAuthor(Authors)
       ),
@@ -46,7 +46,7 @@ export class Book implements IBook {
       stock: data.stock ?? 0,
       total_sales: data.total_sales ?? 0,
       updatedAt: data.updatedAt ? new Date(data.updatedAt) : undefined,
-      coverUrl: data.coverUrl,
+      cover_url: data.cover_url ?? 'assets/images/no-cover.jpg',
     };
   }
 }

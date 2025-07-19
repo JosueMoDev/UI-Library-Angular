@@ -190,7 +190,7 @@
         type="submit"
         severity="success"
         [disabled]="form.invalid"
-        [loading]="mutation.isPending()"
+        [loading]="isEditing ? createMutation.isPending() : updateMutation.isPending()"
         (onClick)="submit()"
       />
     </div>
