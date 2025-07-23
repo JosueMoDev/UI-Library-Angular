@@ -9,7 +9,6 @@ import {
 import { InputText } from 'primeng/inputtext';
 import { Toast } from 'primeng/toast';
 import { ProgressBar } from 'primeng/progressbar';
-import { Badge } from 'primeng/badge';
 import { CommonModule } from '@angular/common';
 import { Steps } from 'primeng/steps';
 import { ConfirmationService, MenuItem, MessageService } from 'primeng/api';
@@ -46,7 +45,6 @@ import { Author } from '@pages/books/models/author.model';
     Button,
     Toast,
     ProgressBar,
-    Badge,
     Steps,
     FileUpload,
     Card,
@@ -76,7 +74,7 @@ export class AuthorModal {
 
   step = signal<number>(0);
   steps: MenuItem[] | undefined;
-  files!: File[];
+  file!: File | null;
   totalSize: number = 0;
   totalSizePercent: number = 0;
   authors: any[] = [];
@@ -112,6 +110,28 @@ export class AuthorModal {
     },
   }));
 
+  fileMutation = injectMutation(() => ({
+    mutationFn: async ({ dto, author }: { dto: File; author: Author }) =>
+      await this.authorService.uploadFile(dto, author),
+    onSuccess: () => {
+      this.msgService.add({
+        severity: 'success',
+        summary: 'Success',
+        detail: 'profile picture was uploaded successfully',
+        life: 3000,
+      });
+      this.queryClient.invalidateQueries({ queryKey: ['authors'] });
+    },
+    onError: (error) => {
+      this.msgService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: `Error while upload profile picture: ${error.message}`,
+        life: 3000,
+      });
+    },
+  }));
+
   updateMutation = injectMutation(() => ({
     mutationFn: async (dto: UpdateAuthorDto) =>
       await this.authorService.updateAuthor(dto),
@@ -134,18 +154,20 @@ export class AuthorModal {
     },
   }));
 
-  uploadedFiles: any[] = [];
+  uploadedFile!: {
+    name: string;
+    url: string | undefined;
+  };
 
   ngOnInit(): void {
     this.author = this.configDialog.data as Author;
     if (this.author) {
       this.isEditing = true;
       this.form.patchValue(this.author);
-      this.uploadedFiles.push({
+      this.uploadedFile = {
         name: this.author.name,
-        objectURL: this.author.profile_picture_url,
-      });
-      this.uploadedFiles = this.uploadedFiles;
+        url: this.author.profile_picture_url,
+      };
     }
 
     this.steps = [
@@ -208,15 +230,8 @@ export class AuthorModal {
     callback();
   }
 
-  onRemoveTemplatingFile(
-    event: Event,
-    file: File,
-    removeFileCallback: CallableFunction,
-    index: number
-  ) {
-    removeFileCallback(event, index);
-    this.totalSize -= parseInt(this.formatSize(file.size));
-    this.totalSizePercent = this.totalSize / 10;
+  onRemoveTemplatingFile() {
+    this.file = null;
   }
 
   onClearTemplatingUpload(clear: CallableFunction) {
@@ -235,24 +250,43 @@ export class AuthorModal {
   }
 
   onSelectedFiles(event: { currentFiles: File[] }) {
-    this.files = event.currentFiles ?? [];
-    this.files.forEach((file: File) => {
-      this.totalSize += parseInt(this.formatSize(file.size));
+    const MAX_BYTES = 3 * 1024 * 1024; // 3 MB
+
+    const originalFile = event.currentFiles[0];
+    const extension = originalFile.name.split('.').pop()?.toLowerCase();
+
+    const newFileName = `${this.author?.id}.${extension}`;
+
+    const renamedFile = new File([originalFile], newFileName, {
+      type: originalFile.type,
     });
-    this.totalSizePercent = this.totalSize / 10;
+
+    this.file = renamedFile;
+
+    this.totalSize = this.file.size;
+    this.totalSizePercent = Math.min((this.totalSize / MAX_BYTES) * 100, 100);
   }
 
-  uploadEvent(callback: CallableFunction) {
-    callback();
+  async uploadEvent() {
+    await this.fileMutation.mutateAsync({
+      dto: this.file!,
+      author: this.author!,
+    });
   }
 
   formatSize(bytes: any) {
     const k = 1024;
     const dm = 3;
+    const MAX_BYTES = 3 * k * k;
     const sizes: string[] | undefined =
       this.config.translation.fileSizeTypes ?? [];
+
     if (bytes === 0) {
       return `0 ${sizes[0]}`;
+    }
+
+    if (bytes > MAX_BYTES) {
+      return `> 3 ${sizes[2] ?? 'MB'}`;
     }
 
     const i = Math.floor(Math.log(bytes) / Math.log(k));
@@ -260,6 +294,7 @@ export class AuthorModal {
 
     return `${formattedSize} ${sizes[i]}`;
   }
+
   closeDialog(event: Event) {
     if (this.form.touched) {
       return this.confirmController.confirm({

@@ -10,7 +10,7 @@ export const CreateAuthorSchema = z.object({
   biography: z.string().min(1, { message: 'Biography is required' }),
   //   nationality: z.string().min(1, { message: 'Nationality is required' }),
   created_by: z.string().min(1, { message: 'Created by is required' }),
-  profilePictureUrl: z
+  profile_picture_url: z
     .string()
     .min(1, { message: 'Nationality is required' })
     .optional(),
