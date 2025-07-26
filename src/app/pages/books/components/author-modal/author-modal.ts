@@ -43,7 +43,6 @@ import { Author } from '@pages/books/models/author.model';
     ReactiveFormsModule,
     InputText,
     Button,
-    Toast,
     ProgressBar,
     Steps,
     FileUpload,

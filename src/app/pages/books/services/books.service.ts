@@ -2,8 +2,10 @@ import { inject, Injectable } from '@angular/core';
 import { IBook } from '../interfaces/book.interface';
 import { SupabaseService } from '@core/Supabase.service';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { CreateBookDto } from '../dtos/create-book-dto';
+import { CreateBookDto } from '../dtos/create-book.dto';
 import { Book } from '../models/book.model';
+import { UpdateBookDto } from '../dtos/update-book.dto';
+import { AuthenticationService } from 'src/app/authentication/authentication.service';
 
 @Injectable({
   providedIn: 'root',
@@ -11,28 +13,38 @@ import { Book } from '../models/book.model';
 export class BooksService {
   private supabaseService = inject(SupabaseService);
   private supabase: SupabaseClient = this.supabaseService.supabase;
+  private auth = inject(AuthenticationService);
 
-  get Books() {
-    const books = Array.from({ length: 20 }, (_, i) => ({
-      id: crypto.randomUUID(),
-      title: `Libro de Ejemplo ${i + 1}`,
-      image: `https://picsum.photos/450/500?random=${i}`,
-      description: `Descripción del libro número ${i + 1}.`,
-      price: Math.floor(Math.random() * 90) + 10,
-      categories: ['Web Design', 'UX/UI', 'Frontend'], // <- arreglo de badges
-      genre: '742db2c8-9f8e-41bb-b029-799e6b4cfcd3',
-      quantity: Math.floor(Math.random() * 50) + 1,
-      sales: Math.floor(Math.random() * 100) + 1,
-      inventoryStatus: 'Disponible',
-      rating: Math.floor(Math.random() * 5) + 1,
-      physicalEnable: Math.random() < 0.7,
-      authors: ['John Doe', 'Jane Smith'],
-    }));
+  async findBookById(id: string): Promise<Book> {
+    const { data, error } = await this.supabase
+      .from('Books')
+      .select(
+        `*,
+      GenresBook (
+          Genres (
+            *
+          )
+        ),
+        AuthorsBook (
+          Authors (
+            *
+          )
+        )
+    `
+      )
+      .eq('id', id)
+      .single();
 
-    return books;
+    if (error) throw new Error(error.message);
+
+    return Book.fromResponseToBook({
+      ...data,
+      authors: data.AuthorsBook,
+      genres: data.GenresBook,
+    });
   }
 
-  async addBook(dto: CreateBookDto): Promise<IBook> {
+  async addBook(dto: CreateBookDto): Promise<Book> {
     const { authors, genres, ...bookData } = dto;
     const { data: book, error: bookError } = await this.supabase
       .from('Books')
@@ -87,13 +99,140 @@ export class BooksService {
     if (error) throw new Error(error.message);
     if (!data) return [];
 
-    const mappedBooks = data.map(({ AuthorsBook, GenresBook, ...book }) =>
+    const mappedData = data.map(({ AuthorsBook, GenresBook, ...book }) =>
       Book.fromResponseToBook({
         ...book,
         authors: AuthorsBook,
         genres: GenresBook,
       })
     );
-    return mappedBooks;
+    return mappedData;
+  }
+
+  async updateBook(dto: UpdateBookDto): Promise<Book> {
+    const { id, updated_by, genres, authors, ...book } = dto;
+
+    const currentBook = await this.findBookById(id);
+
+    const genresToDelete = currentBook.genres.filter(
+      (genre) => !genres?.includes(genre.id)
+    );
+    const authorsToDelete = currentBook.authors.filter(
+      (author) => !authors?.includes(author.id)
+    );
+
+    if (genresToDelete.length > 0) {
+      await this.supabase
+        .from('GenresBook')
+        .delete()
+        .in(
+          'genre_id',
+          genresToDelete.map((genre) => genre.id)
+        );
+    }
+
+    if (authorsToDelete.length > 0) {
+      await this.supabase
+        .from('AuthorsBook')
+        .delete()
+        .in(
+          'author_id',
+          authorsToDelete.map((author) => author.id)
+        );
+    }
+
+    const newGenres = genres!
+      .filter(
+        (genreId) => !currentBook.genres.some((genre) => genre.id === genreId)
+      )
+      .map((genreId) => ({ book_id: id, genre_id: genreId }));
+
+    const newAuthors = authors!
+      .filter(
+        (authorId) =>
+          !currentBook.authors.some((author) => author.id === authorId)
+      )
+      .map((authorId) => ({ book_id: id, author_id: authorId }));
+
+    if (newGenres.length > 0) {
+      await this.supabase.from('GenresBook').upsert(newGenres);
+    }
+
+    if (newAuthors.length > 0) {
+      await this.supabase.from('AuthorsBook').upsert(newAuthors);
+    }
+
+    const { error: updateBookError } = await this.supabase
+      .from('Books')
+      .update({
+        ...book,
+        updated_by,
+      })
+      .eq('id', id);
+
+    if (updateBookError) {
+      throw new Error(updateBookError.message);
+    }
+
+    const { data, error } = await this.supabase
+      .from('Books')
+      .select(
+        `*,
+       GenresBook (
+          Genres (
+            *
+          )
+        ),
+        AuthorsBook (
+          Authors (
+            *
+          )
+        )
+    `
+      )
+      .eq('id', id)
+      .single();
+
+    if (error || !data) {
+      throw new Error('Error getting updated book');
+    }
+
+    return Book.fromResponseToBook({
+      ...data,
+      authors: data.AuthorsBook,
+      genres: data.GenresBook,
+    });
+  }
+
+  async uploadFile(file: File, book: Book) {
+    const { data, error } = await this.supabase.storage
+      .from('books-covers')
+      .upload(`${file.name}`, file);
+    if (error) throw new Error(error.message);
+
+    this.setCoverPictureUrl(data.path, book);
+  }
+
+  async setCoverPictureUrl(filename: string, book: Book) {
+    const { data, error } = await this.supabase.storage
+      .from('books-covers')
+      .createSignedUrl(filename, 604800, {
+        transform: {
+          width: 500,
+          height: 600,
+        },
+      });
+
+    if (error) return;
+
+    const { error: coverBookError } = await this.supabase
+      .from('Books')
+      .update({
+        cover_url: data.signedUrl,
+        updated_by: this.auth.getAuthenticatedUser(),
+      })
+      .eq('id', book.id);
+
+    if (coverBookError) throw new Error('Error while uploading book cover');
   }
 }

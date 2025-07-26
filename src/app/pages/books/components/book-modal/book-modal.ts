@@ -7,9 +7,7 @@ import {
   DialogService,
 } from 'primeng/dynamicdialog';
 import { InputText } from 'primeng/inputtext';
-import { Toast } from 'primeng/toast';
 import { ProgressBar } from 'primeng/progressbar';
-import { Badge } from 'primeng/badge';
 import { CommonModule } from '@angular/common';
 import { Steps } from 'primeng/steps';
 import { ConfirmationService, MenuItem, MessageService } from 'primeng/api';
@@ -34,10 +32,15 @@ import { IGenre } from '@pages/books/interfaces/genre.interface';
 import {
   CreateBookDto,
   CreateBookSchema,
-} from '@pages/books/dtos/create-book-dto';
+} from '@pages/books/dtos/create-book.dto';
 import { BooksService } from '@pages/books/services/books.service';
 import { AuthenticationService } from 'src/app/authentication/authentication.service';
 import { IAuthor } from '@pages/books/interfaces/author.interface';
+import {
+  UpdateBookDto,
+  UpdateBookSchema,
+} from '@pages/books/dtos/update-book.dto';
+import { Book } from '@pages/books/models/book.model';
 
 @Component({
   selector: 'book-modal',
@@ -50,9 +53,7 @@ import { IAuthor } from '@pages/books/interfaces/author.interface';
     InputText,
     ToggleSwitch,
     Button,
-    Toast,
     ProgressBar,
-    Badge,
     Steps,
     FileUpload,
     Card,
@@ -92,7 +93,7 @@ export class BookModal {
 
   step = signal<number>(0);
   steps: MenuItem[] | undefined;
-  files!: File[];
+  file!: File | null;
   totalSize: number = 0;
   totalSizePercent: number = 0;
   book: any | undefined;
@@ -110,7 +111,7 @@ export class BookModal {
     physical_enable: [false],
   });
 
-  mutation = injectMutation(() => ({
+  createMutation = injectMutation(() => ({
     mutationFn: async (dto: CreateBookDto) =>
       await this.bookService.addBook(dto),
     onSuccess: () => {
@@ -132,11 +133,56 @@ export class BookModal {
     },
   }));
 
+  updateMutation = injectMutation(() => ({
+    mutationFn: async (dto: UpdateBookDto) =>
+      await this.bookService.updateBook(dto),
+    onSuccess: () => {
+      this.msgService.add({
+        severity: 'success',
+        summary: 'Success',
+        detail: 'Book was updated successfully',
+        life: 3000,
+      });
+      this.queryClient.invalidateQueries({ queryKey: ['books'] });
+    },
+    onError: (error) => {
+      this.msgService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: `Error al editar: ${error.message}`,
+        life: 3000,
+      });
+    },
+  }));
+
+  fileMutation = injectMutation(() => ({
+    mutationFn: async ({ dto, book }: { dto: File; book: Book }) =>
+      await this.bookService.uploadFile(dto, book),
+    onSuccess: () => {
+      this.msgService.add({
+        severity: 'success',
+        summary: 'Success',
+        detail: 'cover picture was uploaded successfully',
+        life: 3000,
+      });
+      this.queryClient.invalidateQueries({ queryKey: ['authors'] });
+    },
+    onError: (error) => {
+      this.msgService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: `Error while upload cover picture: ${error.message}`,
+        life: 3000,
+      });
+    },
+  }));
+
   uploadedFiles: any[] = [];
 
   ngOnInit(): void {
     this.book = this.configDialog.data;
     if (this.book) {
+      this.isEditing = true;
       this.form.patchValue({
         ...this.book,
         authors: this.book?.authors.map(({ id }: IAuthor) => id),
@@ -163,85 +209,48 @@ export class BookModal {
 
   async submit() {
     if (this.form.valid) {
-      console.log(this.form.value);
-      const result = CreateBookSchema.safeParse({
-        ...this.form.value,
-        created_by: this.auth.getAuthenticatedUser(),
-      } as CreateBookDto);
-      if (!result.success) {
-        result.error.errors.map((err) =>
-          this.msgService.add({
-            key: err.code,
-            severity: 'error',
-            summary: 'Error',
-            detail: `Error al guardar: ${err.message}`,
-            life: 3000,
-          })
-        );
-      }
       if (this.isEditing) {
-      } else {
-        await this.mutation.mutateAsync(result.data!);
+        const result = UpdateBookSchema.safeParse({
+          id: this.book.id,
+          ...this.form.value,
+          updated_by: this.auth.getAuthenticatedUser(),
+        } as UpdateBookDto);
+        if (!result.success) {
+          result.error.errors.map((err) =>
+            this.msgService.add({
+              key: err.code,
+              severity: 'error',
+              summary: 'Error',
+              detail: `Error al editar: ${err.message}`,
+              life: 3000,
+            })
+          );
+        }
+        await this.updateMutation.mutateAsync(result.data!);
+        this.ref.close();
       }
-      this.ref.close();
+      if (!this.isEditing) {
+        const result = CreateBookSchema.safeParse({
+          ...this.form.value,
+          created_by: this.auth.getAuthenticatedUser(),
+        } as CreateBookDto);
+        if (!result.success) {
+          result.error.errors.map((err) =>
+            this.msgService.add({
+              key: err.code,
+              severity: 'error',
+              summary: 'Error',
+              detail: `Error al guardar: ${err.message}`,
+              life: 3000,
+            })
+          );
+        }
+        await this.createMutation.mutateAsync(result.data!);
+        this.ref.close();
+      }
     }
   }
-  choose(event: Event, callback: CallableFunction) {
-    callback();
-  }
 
-  onRemoveTemplatingFile(
-    event: Event,
-    file: File,
-    removeFileCallback: CallableFunction,
-    index: number
-  ) {
-    removeFileCallback(event, index);
-    this.totalSize -= parseInt(this.formatSize(file.size));
-    this.totalSizePercent = this.totalSize / 10;
-  }
-
-  onClearTemplatingUpload(clear: CallableFunction) {
-    clear();
-    this.totalSize = 0;
-    this.totalSizePercent = 0;
-  }
-
-  onTemplatedUpload() {
-    this.msgService.add({
-      severity: 'info',
-      summary: 'Success',
-      detail: 'File Uploaded',
-      life: 3000,
-    });
-  }
-
-  onSelectedFiles(event: { currentFiles: File[] }) {
-    this.files = event.currentFiles ?? [];
-    this.files.forEach((file: File) => {
-      this.totalSize += parseInt(this.formatSize(file.size));
-    });
-    this.totalSizePercent = this.totalSize / 10;
-  }
-
-  uploadEvent(callback: CallableFunction) {
-    callback();
-  }
-
-  formatSize(bytes: any) {
-    const k = 1024;
-    const dm = 3;
-    const sizes: string[] | undefined =
-      this.config.translation.fileSizeTypes ?? [];
-    if (bytes === 0) {
-      return `0 ${sizes[0]}`;
-    }
-
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    const formattedSize = parseFloat((bytes / Math.pow(k, i)).toFixed(dm));
-
-    return `${formattedSize} ${sizes[i]}`;
-  }
   closeDialog(event: Event) {
     if (this.form.touched) {
       return this.confirmController.confirm({
@@ -351,5 +360,74 @@ export class BookModal {
       this.selectedGenres = [];
       this.form.get('genres')?.reset();
     }
+  }
+
+  choose(event: Event, callback: CallableFunction) {
+    callback();
+  }
+
+  onRemoveTemplatingFile() {
+    this.file = null;
+  }
+
+  onClearTemplatingUpload(clear: CallableFunction) {
+    clear();
+    this.totalSize = 0;
+    this.totalSizePercent = 0;
+  }
+
+  onTemplatedUpload() {
+    this.msgService.add({
+      severity: 'info',
+      summary: 'Success',
+      detail: 'File Uploaded',
+      life: 3000,
+    });
+  }
+
+  onSelectedFiles(event: { currentFiles: File[] }) {
+    const MAX_BYTES = 3 * 1024 * 1024; // 3 MB
+
+    const originalFile = event.currentFiles[0];
+    const extension = originalFile.name.split('.').pop()?.toLowerCase();
+
+    const newFileName = `${this.book?.id}.${extension}`;
+
+    const renamedFile = new File([originalFile], newFileName, {
+      type: originalFile.type,
+    });
+
+    this.file = renamedFile;
+
+    this.totalSize = this.file.size;
+    this.totalSizePercent = Math.min((this.totalSize / MAX_BYTES) * 100, 100);
+  }
+
+  async uploadEvent() {
+    await this.fileMutation.mutateAsync({
+      dto: this.file!,
+      book: this.book!,
+    });
+  }
+
+  formatSize(bytes: any) {
+    const k = 1024;
+    const dm = 3;
+    const MAX_BYTES = 3 * k * k;
+    const sizes: string[] | undefined =
+      this.config.translation.fileSizeTypes ?? [];
+
+    if (bytes === 0) {
+      return `0 ${sizes[0]}`;
+    }
+
+    if (bytes > MAX_BYTES) {
+      return `> 3 ${sizes[2] ?? 'MB'}`;
+    }
+
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    const formattedSize = parseFloat((bytes / Math.pow(k, i)).toFixed(dm));
+
+    return `${formattedSize} ${sizes[i]}`;
   }
 }
