@@ -4,7 +4,7 @@ import { Injectable, signal, WritableSignal } from '@angular/core';
   providedIn: 'root',
 })
 export class AppService {
-  state: WritableSignal<boolean> = signal<boolean>(false);
+  state: WritableSignal<boolean> = signal<boolean>(true);
 
   constructor() {}
 

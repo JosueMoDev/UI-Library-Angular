@@ -263,15 +263,14 @@ export class BookModal {
         closeOnEscape: true,
         icon: 'pi pi-exclamation-triangle',
         rejectButtonProps: {
-          label: 'NO',
+          label: 'Cancelar',
           severity: 'secondary',
           outlined: true,
         },
         acceptButtonProps: {
-          label: 'SI',
+          label: 'Si, Cerrar',
         },
         accept: () => this.ref.close(),
-        reject: () => {},
       });
     }
     return this.ref.close();

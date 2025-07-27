@@ -53,7 +53,7 @@ export class BookLayout {
         label: 'Subir Imagenes',
         icon: 'pi pi-cloud-upload',
         command: () => {
-          this.editBook(this.book());
+          this.editBook(this.book(), 1);
         },
       },
       {
@@ -88,7 +88,7 @@ export class BookLayout {
       .join(', ');
   }
 
-  editBook(book: Book) {
+  editBook(book: Book, step?: number) {
     this.ref = this.modalController.open(BookModal, {
       width: '50%',
       height: 'auto',
@@ -96,14 +96,8 @@ export class BookLayout {
       modal: true,
       data: {
         book,
-        step: 1,
+        step,
       },
-    });
-    this.ref.onClose.subscribe((result) => {
-      if (!result) this.ref.destroy();
-      if (result) {
-        console.log('Resultado del modal:', result);
-      }
     });
   }
 
