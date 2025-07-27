@@ -231,21 +231,21 @@
 
     <div class="flex justify-between mt-6"></div>
   </form>
-  <p-confirmdialog />
+
   <ng-template #footer>
     <div class="flex gap-4 mt-1">
+      @if(step() === 0){
       <p-button
-        label="Save"
+        label="Guardar"
         class="w-full"
         styleClass="w-full"
-        pButton
-        label="Guardar"
         type="submit"
         severity="success"
         [disabled]="form.invalid || (isEditing ? updateMutation.isPending() : createMutation.isPending())"
         [loading]="isEditing ? updateMutation.isPending() : createMutation.isPending()"
         (onClick)="submit()"
-      />
+      ></p-button>
+      }
     </div>
   </ng-template>
 </p-card>

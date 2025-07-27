@@ -27,8 +27,6 @@ import { injectQuery } from '@tanstack/angular-query-experimental';
   providers: [BooksService],
 })
 export default class BookList implements OnInit {
-  layout: any = 'grid';
-  options = ['list', 'grid'];
   booksService = inject(BooksService);
   modalController: DialogService = inject(DialogService);
   private ref!: DynamicDialogRef;
@@ -75,22 +73,6 @@ export default class BookList implements OnInit {
 
     this.ref.onClose.subscribe((result) => {
       if (!result) this.ref.destroy();
-    });
-  }
-
-  editBook(book: any) {
-    this.ref = this.modalController.open(BookModal, {
-      width: '50%',
-      height: 'auto',
-      dismissableMask: false,
-      modal: true,
-      data: book,
-    });
-    this.ref.onClose.subscribe((result) => {
-      if (!result) this.ref.destroy();
-      if (result) {
-        console.log('Resultado del modal:', result);
-      }
     });
   }
 }

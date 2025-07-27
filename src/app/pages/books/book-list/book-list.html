@@ -2,7 +2,7 @@
   <p-dataview
     #dv
     [value]="allBooks.data()"
-    [layout]="layout"
+    layout="list"
     [paginator]="!!allBooks.data()"
     [rows]="rows"
     [totalRecords]="totalRecords"
@@ -12,21 +12,7 @@
   >
     <ng-template #header>
       <div class="flex justify-between gap-2">
-        <p-selectbutton
-          [(ngModel)]="layout"
-          [options]="options"
-          [allowEmpty]="false"
-        >
-          <ng-template let-item pTemplate="item">
-            <i
-              class="pi"
-              [ngClass]="{
-                'pi-bars': item === 'list',
-                'pi-table': item === 'grid'
-              }"
-            ></i>
-          </ng-template>
-        </p-selectbutton>
+        <p-selectbutton [allowEmpty]="false"> </p-selectbutton>
         <button
           pButton
           icon="pi pi-plus"
@@ -45,9 +31,7 @@
         [ngClass]="{
           'border-t border-surface-200 dark:border-surface-700': !true
         }"
-        (click)="editBook(book)"
         [book]="book"
-        [isListLayout]="true"
       />
       }@empty { @for ( i of counterArray(8); track $index) {
       <book-skeleton
@@ -57,20 +41,6 @@
         }"
       />
       } }
-    </ng-template>
-
-    <ng-template #grid let-items>
-      <div class="grid grid-cols-15 justify-items-center gap-4">
-        @for (book of items; track $index) {
-        <book-layout
-          [isListLayout]="false"
-          (click)="editBook(book)"
-          [book]="book"
-        />
-        }@empty { @for ( i of counterArray(8);; track $index) {
-        <book-skeleton [isListLayout]="false" />
-        } }
-      </div>
     </ng-template>
   </p-dataview>
 </div>

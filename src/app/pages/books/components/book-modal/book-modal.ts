@@ -15,7 +15,6 @@ import { ToggleSwitch } from 'primeng/toggleswitch';
 import { FileUpload } from 'primeng/fileupload';
 import { PrimeNG } from 'primeng/config';
 import { Card } from 'primeng/card';
-import { ConfirmDialog } from 'primeng/confirmdialog';
 import { IconFieldModule } from 'primeng/iconfield';
 import { TableModule } from 'primeng/table';
 import { AuthorsService } from '@pages/books/services/authors.service';
@@ -29,10 +28,7 @@ import {
   QueryClient,
 } from '@tanstack/angular-query-experimental';
 import { IGenre } from '@pages/books/interfaces/genre.interface';
-import {
-  CreateBookDto,
-  CreateBookSchema,
-} from '@pages/books/dtos/create-book.dto';
+
 import { BooksService } from '@pages/books/services/books.service';
 import { AuthenticationService } from 'src/app/authentication/authentication.service';
 import { IAuthor } from '@pages/books/interfaces/author.interface';
@@ -41,6 +37,10 @@ import {
   UpdateBookSchema,
 } from '@pages/books/dtos/update-book.dto';
 import { Book } from '@pages/books/models/book.model';
+import {
+  CreateBookDto,
+  CreateBookSchema,
+} from '@pages/books/dtos/create-book.dto';
 
 @Component({
   selector: 'book-modal',
@@ -57,7 +57,6 @@ import { Book } from '@pages/books/models/book.model';
     Steps,
     FileUpload,
     Card,
-    ConfirmDialog,
     IconFieldModule,
     TableModule,
     MultiSelectModule,
@@ -69,8 +68,10 @@ export class BookModal {
   private modalGenrRef!: DynamicDialogRef;
   private modalAuthorRef!: DynamicDialogRef;
 
-  private configDialog: DynamicDialogConfig<object> =
-    inject(DynamicDialogConfig);
+  private configDialog: DynamicDialogConfig<{
+    book: Book;
+    step: number | undefined;
+  }> = inject(DynamicDialogConfig);
   private fb = inject(FormBuilder);
   private config: PrimeNG = inject(PrimeNG);
   private msgService: MessageService = inject(MessageService);
@@ -180,7 +181,8 @@ export class BookModal {
   uploadedFiles: any[] = [];
 
   ngOnInit(): void {
-    this.book = this.configDialog.data;
+    this.book = this.configDialog.data?.book;
+    this.step.set(this.configDialog.data?.step ?? 0);
     if (this.book) {
       this.isEditing = true;
       this.form.patchValue({
@@ -235,7 +237,7 @@ export class BookModal {
           created_by: this.auth.getAuthenticatedUser(),
         } as CreateBookDto);
         if (!result.success) {
-          result.error.errors.map((err) =>
+          result.error.errors.map((err: any) =>
             this.msgService.add({
               key: err.code,
               severity: 'error',

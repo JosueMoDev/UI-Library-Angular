@@ -1,67 +1,8 @@
-/* .book-list {
-  @apply flex flex-col sm:flex-row sm:items-center p-6 gap-4 cursor-pointer hover:shadow-md hover:opacity-80 transition-all duration-200 rounded border-t border-surface-200 dark:border-surface-700;
+.custom-menuitem-danger {
+  background-color: #f44336;
+  color: white;
 }
-
-.book-grid {
-  @apply col-span-12 sm:col-span-6 md:col-span-4 xl:col-span-3 p-2 cursor-pointer hover:shadow-md hover:opacity-80 transition-all duration-200 rounded;
+::ng-deep .menu-no-border {
+  border: none !important;
+  box-shadow: none !important;
 }
-
-.book-list__image-wrapper {
-  @apply md:w-40 relative;
-}
-
-.book-grid__image-wrapper {
-  @apply p-6 border border-surface-200 dark:border-surface-700 bg-surface-0 dark:bg-surface-900 rounded flex justify-center;
-}
-
-.book-list__image {
-  @apply block xl:block mx-auto rounded w-full;
-}
-
-.book-grid__image {
-  @apply rounded w-full max-w-[300px];
-}
-
-.book-list__content {
-  @apply flex flex-col md:flex-row justify-between md:items-center flex-1 gap-6;
-}
-
-.book-grid__content {
-  @apply pt-6 flex flex-col gap-6;
-}
-
-.book-list__info {
-  @apply flex flex-row md:flex-col justify-between items-start gap-2;
-}
-
-.book-list__buy {
-  @apply flex flex-col md:items-end gap-8;
-}
-
-.book-tag {
-  @apply absolute dark:!bg-surface-900;
-}
-
-.book-category {
-  @apply font-medium text-surface-500 dark:text-surface-400 text-sm;
-}
-
-.book-title {
-  @apply text-lg font-medium mt-2;
-}
-
-.book-rating {
-  @apply bg-surface-100 p-1 rounded-full;
-}
-
-.book-rating > div {
-  @apply bg-surface-0 flex items-center gap-2 justify-center py-1 px-2 rounded-full shadow-sm;
-}
-
-.book-price {
-  @apply text-xl md:text-2xl font-semibold;
-}
-
-.book-actions {
-  @apply flex gap-2 flex-wrap;
-} */
