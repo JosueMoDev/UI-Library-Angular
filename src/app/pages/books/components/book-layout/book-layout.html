@@ -84,12 +84,71 @@
               icon="pi pi-ellipsis-v"
               [rounded]="true"
               severity="secondary"
-              (click)="op.toggle($event)"
+              (click)="toggle($event)"
             ></p-button>
 
-            <p-overlayPanel #op [dismissable]="true" [showCloseIcon]="false">
-              <p-menu [model]="items" styleClass="menu-no-border"></p-menu>
-            </p-overlayPanel>
+            <p-popover
+              #op
+              [dismissable]="true"
+              appendTo="body"
+              position="bottom"
+            >
+              <div class="flex flex-col gap-2 min-w-[180px] mr-0">
+                <button
+                  type="button"
+                  class="flex items-center w-full px-3 py-2 text-sm text-left text-gray-100 hover:bg-gray-800 transition rounded-sm hover:opacity-95 cursor-pointer"
+                  (click)="onCompartir()"
+                >
+                  <i class="pi pi-upload mr-2 text-gray-100"></i>
+                  Compartir
+                </button>
+
+                <button
+                  type="button"
+                  class="flex items-center w-full px-3 py-2 text-sm text-left text-gray-100 hover:bg-gray-800 transition rounded-sm hover:opacity-95 cursor-pointer"
+                  (click)="editBook(book())"
+                >
+                  <i class="pi pi-pencil mr-2 text-gray-100"></i>
+                  Editar
+                </button>
+
+                <button
+                  type="button"
+                  class="flex items-center w-full px-3 py-2 text-sm text-left text-gray-100 hover:bg-gray-800 transition rounded-sm hover:opacity-95 cursor-pointer"
+                  (click)="toggleStatus()"
+                >
+                  <i class="{{ getIcon() }} mr-2 text-gray-100"></i>
+                  {{ book().is_enable ? 'Inhabilitar' : 'Habilitar' }}
+                </button>
+
+                <button
+                  type="button"
+                  class="flex items-center w-full px-3 py-2 text-sm text-left text-gray-100 hover:bg-gray-800 transition rounded-sm hover:opacity-95 cursor-pointer"
+                  (click)="onArchivar()"
+                >
+                  <i class="pi pi-tag mr-2 text-gray-100"></i>
+                  Aplicar Promo
+                </button>
+
+                <button
+                  type="button"
+                  class="flex items-center w-full px-3 py-2 text-sm text-left text-gray-100 hover:bg-gray-800 transition rounded-sm hover:opacity-95 cursor-pointer"
+                  (click)="editBook(book(), 1)"
+                >
+                  <i class="pi pi-cloud-upload mr-2 text-gray-100"></i>
+                  Subir Imágenes
+                </button>
+
+                <button
+                  type="button"
+                  class="flex items-center w-full px-3 py-2 text-sm text-left text-white bg-red-600 hover:bg-red-500 rounded-sm transition hover:opacity-95 cursor-pointer"
+                  (click)="deleteDialog($event)"
+                >
+                  <i class="pi pi-trash mr-2 text-gray-100"></i>
+                  Eliminar
+                </button>
+              </div>
+            </p-popover>
           </div>
 
           <div class="flex items-end gap-4 mt-auto">

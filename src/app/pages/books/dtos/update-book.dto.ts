@@ -7,6 +7,7 @@ export const UpdateBookSchema = z
     updated_by: z
       .string()
       .uuid('El ID del actualizador debe ser un UUID válido'),
+    is_enable: z.boolean({ message: 'must be a boolean property' }).optional(),
   })
   .merge(CreateBookSchema.partial().omit({ created_by: true }));
 

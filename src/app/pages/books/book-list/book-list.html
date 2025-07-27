@@ -33,14 +33,16 @@
         }"
         [book]="book"
       />
-      }@empty { @for ( i of counterArray(8); track $index) {
+      }@empty { @if(!allBooks.isLoading() && !allBooks.data()?.length){
+      <h1>No hay Libros que mostrar!</h1>
+      } @else { @for ( i of counterArray(8); track $index) {
       <book-skeleton
         [isListLayout]="true"
         [ngClass]="{
           'border-t border-surface-200 dark:border-surface-700': !first
         }"
       />
-      } }
+      } } }
     </ng-template>
   </p-dataview>
 </div>

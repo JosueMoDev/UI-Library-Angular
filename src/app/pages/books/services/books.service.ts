@@ -210,7 +210,7 @@ export class BooksService {
       .upload(`${file.name}`, file);
     if (error) throw new Error(error.message);
 
-    this.setCoverPictureUrl(data.path, book);
+    await this.setCoverPictureUrl(data.path, book);
   }
 
   async setCoverPictureUrl(filename: string, book: Book) {
@@ -229,10 +229,99 @@ export class BooksService {
       .from('Books')
       .update({
         cover_url: data.signedUrl,
+        cover_name: filename,
         updated_by: this.auth.getAuthenticatedUser(),
       })
       .eq('id', book.id);
 
     if (coverBookError) throw new Error('Error while uploading book cover');
+  }
+
+  async changeBookStatus({ id, is_enable }: UpdateBookDto) {
+    await this.findBookById(id);
+    const { error } = await this.supabase
+      .from('Books')
+      .update({
+        is_enable: !is_enable,
+        updated_by: this.auth.getAuthenticatedUser(),
+      })
+      .eq('id', id);
+
+    if (error) throw new Error('Error while trying update book status');
+  }
+
+  async deleteBook(id: string): Promise<void> {
+    const currentBook = await this.findBookById(id);
+    if (!currentBook) {
+      throw new Error('Book not found');
+    }
+
+    const deletedRelations = [];
+
+    try {
+      const genresToDelete = currentBook.genres.map((genre) => genre.id);
+      const authorsToDelete = currentBook.authors.map((author) => author.id);
+
+      if (genresToDelete.length > 0) {
+        const { error: deleteGenresError } = await this.supabase
+          .from('GenresBook')
+          .delete()
+          .in('genre_id', genresToDelete);
+        if (deleteGenresError) {
+          throw new Error(deleteGenresError.message);
+        }
+        deletedRelations.push('GenresBook');
+      }
+
+      if (authorsToDelete.length > 0) {
+        const { error: deleteAuthorsError } = await this.supabase
+          .from('AuthorsBook')
+          .delete()
+          .in('author_id', authorsToDelete);
+        if (deleteAuthorsError) {
+          throw new Error(deleteAuthorsError.message);
+        }
+        deletedRelations.push('AuthorsBook');
+      }
+
+      const { error: deleteBookError } = await this.supabase
+        .from('Books')
+        .delete()
+        .eq('id', id);
+      if (deleteBookError) {
+        throw new Error(deleteBookError.message);
+      }
+
+      if (currentBook.cover_name) {
+        const { error: deleteImageError } = await this.supabase.storage
+          .from('books-covers')
+          .remove([currentBook.cover_name!]);
+
+        if (deleteImageError) {
+          throw new Error('Error deleting cover image');
+        }
+      }
+    } catch (error) {
+      for (const relation of deletedRelations) {
+        if (relation === 'GenresBook') {
+          await this.supabase.from('GenresBook').upsert(
+            currentBook.genres.map((genre) => ({
+              genre_id: genre.id,
+              book_id: id,
+            }))
+          );
+        } else if (relation === 'AuthorsBook') {
+          await this.supabase.from('AuthorsBook').upsert(
+            currentBook.authors.map((author) => ({
+              author_id: author.id,
+              book_id: id,
+            }))
+          );
+        }
+      }
+
+      //TODO: Mejorar en caso de falle haga rollback
+      throw new Error(`Error deleting book: ${error}`);
+    }
   }
 }

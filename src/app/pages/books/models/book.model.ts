@@ -18,10 +18,12 @@ export class Book implements IBook {
     public authors: IAuthor[],
     public genres: IGenre[],
     public stock: number,
+    public is_enable: boolean,
     public total_sales: number,
     public digitalFileUrl?: string,
     public updatedAt?: Date,
-    public cover_url?: string
+    public cover_url?: string,
+    public cover_name?: string
   ) {}
 
   static fromResponseToBook(data: IBook): Book {
@@ -47,6 +49,8 @@ export class Book implements IBook {
       total_sales: data.total_sales ?? 0,
       updatedAt: data.updatedAt ? new Date(data.updatedAt) : undefined,
       cover_url: data.cover_url ?? 'assets/images/no-cover.jpg',
+      is_enable: data.is_enable ?? true,
+      cover_name: data.cover_name,
     };
   }
 }

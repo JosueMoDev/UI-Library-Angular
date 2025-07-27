@@ -199,7 +199,7 @@
               [rounded]="true"
               [outlined]="true"
               severity="success"
-              [disabled]="fileMutation.isPending()"
+              [disabled]="fileMutation.isPending() || !file"
             />
           </div>
 

@@ -166,7 +166,7 @@ export class BookModal {
         detail: 'cover picture was uploaded successfully',
         life: 3000,
       });
-      this.queryClient.invalidateQueries({ queryKey: ['authors'] });
+      this.queryClient.invalidateQueries({ queryKey: ['books'] });
     },
     onError: (error) => {
       this.msgService.add({
@@ -192,7 +192,7 @@ export class BookModal {
       });
       this.uploadedFiles.push({
         name: this.book.title,
-        objectURL: this.book.image,
+        cover_url: this.book.cover_url,
       });
       this.uploadedFiles = this.uploadedFiles;
     }

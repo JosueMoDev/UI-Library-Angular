@@ -15,6 +15,8 @@ export interface IBook {
   genres: IGenre[];
   stock: number;
   total_sales: number;
+  is_enable: boolean;
+  cover_name?: string;
   updatedAt?: Date;
   cover_url?: string;
   digitalFileUrl?: string;
