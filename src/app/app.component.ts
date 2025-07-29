@@ -4,7 +4,7 @@ import { SidebarComponent } from '@shared/components/sidebar/sidebar.component';
 import { MenubarComponent } from '@shared/components/menubar/menubar.component';
 import { AppService } from '@services/app.service';
 import { CommonModule } from '@angular/common';
-import { DialogService, DynamicDialogRef } from 'primeng/dynamicdialog';
+import { DialogService } from 'primeng/dynamicdialog';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { AuthenticationService } from './authentication/authentication.service';
 import { ToastModule } from 'primeng/toast';
@@ -15,7 +15,6 @@ import { ConfirmDialog } from 'primeng/confirmdialog';
   imports: [
     RouterOutlet,
     SidebarComponent,
-    MenubarComponent,
     CommonModule,
     ToastModule,
     ConfirmDialog,
@@ -25,6 +24,7 @@ import { ConfirmDialog } from 'primeng/confirmdialog';
   providers: [DialogService, MessageService, ConfirmationService],
 })
 export class AppComponent {
+  title: string = 'UI-Library-Angular';
   auth = inject(AuthenticationService);
   msgService = inject(MessageService);
 
