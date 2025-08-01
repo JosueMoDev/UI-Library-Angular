@@ -4,17 +4,17 @@ import { IAuthor } from '@pages/books/interfaces/author.interface';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { Button } from 'primeng/button';
 import { Book } from '../../models/book.model';
-import { DialogService, DynamicDialogRef } from 'primeng/dynamicdialog';
+import { DialogService } from 'primeng/dynamicdialog';
 
-import { BookModal } from '../book-modal/book-modal';
 import {
   injectMutation,
   QueryClient,
 } from '@tanstack/angular-query-experimental';
 import { UpdateBookDto } from '@pages/books/dtos/update-book.dto';
 import { BooksService } from '@pages/books/services/books.service';
-import { AuthenticationService } from 'src/app/authentication/authentication.service';
+import { AuthenticationService } from '@services/authentication.service';
 import { Popover } from 'primeng/popover';
+import { BookForm } from '../book-form/book-form';
 
 @Component({
   selector: 'book-layout',
@@ -24,8 +24,7 @@ import { Popover } from 'primeng/popover';
 })
 export class BookLayout {
   @ViewChild('op') op!: Popover;
-  private ref!: DynamicDialogRef;
-  modalController: DialogService = inject(DialogService);
+  private dialogController: DialogService = inject(DialogService);
   bookService = inject(BooksService);
   private msgService: MessageService = inject(MessageService);
   private confirmController: ConfirmationService = inject(ConfirmationService);
@@ -50,8 +49,14 @@ export class BookLayout {
       .join(', ');
   }
 
-  editBook(book: Book, step?: number) {
-    this.ref = this.modalController.open(BookModal, {
+  handleDialogBook(
+    book: Book | undefined,
+    step: number,
+    isEditing: boolean,
+    event: Event
+  ) {
+    event.stopPropagation();
+    this.dialogController.open(BookForm, {
       width: '50%',
       height: 'auto',
       dismissableMask: false,
@@ -59,6 +64,7 @@ export class BookLayout {
       data: {
         book,
         step,
+        isEditing,
       },
     });
   }

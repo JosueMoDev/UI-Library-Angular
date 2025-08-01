@@ -106,7 +106,7 @@
                 <button
                   type="button"
                   class="flex items-center w-full px-3 py-2 text-sm text-left text-gray-100 hover:bg-gray-800 transition rounded-sm hover:opacity-95 cursor-pointer"
-                  (click)="editBook(book())"
+                  (click)="handleDialogBook(book(), 0, true, $event)"
                 >
                   <i class="pi pi-pencil mr-2 text-gray-100"></i>
                   Editar
@@ -133,7 +133,7 @@
                 <button
                   type="button"
                   class="flex items-center w-full px-3 py-2 text-sm text-left text-gray-100 hover:bg-gray-800 transition rounded-sm hover:opacity-95 cursor-pointer"
-                  (click)="editBook(book(), 1)"
+                  (click)="handleDialogBook(book(), 1, true, $event)"
                 >
                   <i class="pi pi-cloud-upload mr-2 text-gray-100"></i>
                   Subir Imágenes

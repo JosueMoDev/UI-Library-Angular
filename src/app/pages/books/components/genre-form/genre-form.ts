@@ -1,41 +1,43 @@
 import { Component, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MessageService } from 'primeng/api';
-import { Button } from 'primeng/button';
-import { Card } from 'primeng/card';
 import { DynamicDialogConfig, DynamicDialogRef } from 'primeng/dynamicdialog';
 import { InputText } from 'primeng/inputtext';
+
 import {
   injectMutation,
   QueryClient,
 } from '@tanstack/angular-query-experimental';
-
 import {
   CreateGenreDto,
   CreateGenreSchema,
 } from '@pages/books/dtos/create-genre.dto';
 import { GenresService } from '@pages/books/services/genres.service';
-import { AuthenticationService } from 'src/app/authentication/authentication.service';
+import { AuthenticationService } from '@services/authentication.service';
 import {
   UpdateGenreDto,
   UpdateGenreSchema,
 } from '@pages/books/dtos/update-genre.dto';
 import { Genre } from '@pages/books/models/genre.model';
+import { Card } from 'primeng/card';
+import { Button } from 'primeng/button';
 @Component({
-  selector: 'genre-modal',
-  imports: [Button, Card, ReactiveFormsModule, InputText],
-  templateUrl: './genre-modal.html',
-  styleUrl: './genre-modal.css',
+  selector: 'genre-form',
+  imports: [ReactiveFormsModule, Card, Button, InputText],
+  templateUrl: './genre-form.html',
+  styleUrl: './genre-form.css',
 })
-export class GenreModal {
+export class GenreForm {
   private readonly ref: DynamicDialogRef = inject(DynamicDialogRef);
   private genreService: GenresService = inject(GenresService);
   queryClient = inject(QueryClient);
   private fb = inject(FormBuilder);
   private readonly auth = inject(AuthenticationService);
   private readonly msgService = inject(MessageService);
-  private readonly configDialog: DynamicDialogConfig<object> =
-    inject(DynamicDialogConfig);
+  private readonly configDialog: DynamicDialogConfig<{
+    genre: Genre | undefined;
+    isEditing: boolean;
+  }> = inject(DynamicDialogConfig);
   isEditing: boolean = false;
 
   private genre: Genre | undefined;
@@ -89,9 +91,9 @@ export class GenreModal {
   });
 
   ngOnInit(): void {
-    this.genre = this.configDialog.data as Genre;
-    if (this.genre) {
-      this.isEditing = true;
+    this.genre = this.configDialog.data?.genre;
+    this.isEditing = this.configDialog.data!.isEditing;
+    if (this.genre && this.isEditing) {
       this.form.patchValue(this.genre);
     }
   }

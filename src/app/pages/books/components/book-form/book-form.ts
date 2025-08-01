@@ -20,8 +20,6 @@ import { TableModule } from 'primeng/table';
 import { AuthorsService } from '@pages/books/services/authors.service';
 import { GenresService } from '@pages/books/services/genres.service';
 import { MultiSelectModule } from 'primeng/multiselect';
-import { GenreModal } from '../genre-modal/genre-modal';
-import { AuthorModal } from '../author-modal/author-modal';
 import {
   injectMutation,
   injectQuery,
@@ -30,7 +28,7 @@ import {
 import { IGenre } from '@pages/books/interfaces/genre.interface';
 
 import { BooksService } from '@pages/books/services/books.service';
-import { AuthenticationService } from 'src/app/authentication/authentication.service';
+import { AuthenticationService } from '@services/authentication.service';
 import { IAuthor } from '@pages/books/interfaces/author.interface';
 import {
   UpdateBookDto,
@@ -41,11 +39,15 @@ import {
   CreateBookDto,
   CreateBookSchema,
 } from '@pages/books/dtos/create-book.dto';
+import { Author } from '@pages/books/models/author.model';
+import { Genre } from '@pages/books/models/genre.model';
+import { GenreForm } from '../genre-form/genre-form';
+import { AuthorForm } from '../author-form/author-form';
 
 @Component({
-  selector: 'book-modal',
-  templateUrl: './book-modal.html',
-  styleUrl: './book-modal.css',
+  selector: 'book-form',
+  templateUrl: './book-form.html',
+  styleUrl: './book-form.css',
   imports: [
     ButtonModule,
     CommonModule,
@@ -62,16 +64,18 @@ import {
     MultiSelectModule,
   ],
 })
-export class BookModal {
+export class BookForm {
   private ref: DynamicDialogRef = inject(DynamicDialogRef);
+  private GenrDialogRef!: DynamicDialogRef;
+  private AuthorDialogRef!: DynamicDialogRef;
   modalController: DialogService = inject(DialogService);
-  private modalGenrRef!: DynamicDialogRef;
-  private modalAuthorRef!: DynamicDialogRef;
 
   private configDialog: DynamicDialogConfig<{
     book: Book;
     step: number | undefined;
+    isEditing: boolean;
   }> = inject(DynamicDialogConfig);
+
   private fb = inject(FormBuilder);
   private config: PrimeNG = inject(PrimeNG);
   private msgService: MessageService = inject(MessageService);
@@ -101,7 +105,7 @@ export class BookModal {
   authors: any[] = [];
   selectedAuthors: any[] = [];
   selectedGenres: any[] = [];
-  isEditing: boolean = false;
+  isEditing!: boolean;
 
   form = this.fb.group({
     title: [<string>'', Validators.required],
@@ -182,9 +186,9 @@ export class BookModal {
 
   ngOnInit(): void {
     this.book = this.configDialog.data?.book;
+    this.isEditing = this.configDialog.data!.isEditing;
     this.step.set(this.configDialog.data?.step ?? 0);
-    if (this.book) {
-      this.isEditing = true;
+    if (this.book && this.isEditing) {
       this.form.patchValue({
         ...this.book,
         authors: this.book?.authors.map(({ id }: IAuthor) => id),
@@ -284,63 +288,43 @@ export class BookModal {
   onSearchAuthor(event: Event) {
     const input = event.target as HTMLInputElement;
   }
-  addNewGenre() {
-    this.modalGenrRef = this.modalController.open(GenreModal, {
-      width: '50%',
-      height: 'auto',
-      dismissableMask: false,
-      modal: true,
-      closable: true,
-    });
 
-    this.modalGenrRef.onClose.subscribe((result) => {
-      if (!result) this.modalGenrRef.destroy();
-    });
-  }
-
-  editGenre(genre: any, event: Event) {
+  handleGenreForm(genre: Genre | undefined, isEditing: boolean, event: Event) {
     event.stopPropagation();
-    this.modalGenrRef = this.modalController.open(GenreModal, {
+    this.GenrDialogRef = this.modalController.open(GenreForm, {
       width: '50%',
       height: 'auto',
       dismissableMask: false,
-      modal: true,
       closable: true,
-      data: genre,
-    });
-
-    this.modalGenrRef.onClose.subscribe((result) => {
-      if (!result) this.modalGenrRef.destroy();
-    });
-  }
-
-  addAuthor() {
-    this.modalAuthorRef = this.modalController.open(AuthorModal, {
-      width: '50%',
-      height: 'auto',
-      dismissableMask: false,
       modal: true,
+      data: {
+        genre,
+        isEditing,
+      },
     });
-
-    this.modalAuthorRef.onClose.subscribe((result) => {
-      if (!result) this.modalAuthorRef.destroy();
+    this.GenrDialogRef.onClose.subscribe((result) => {
+      if (!result) this.GenrDialogRef.destroy();
     });
   }
 
-  editAuthor(author: any, event: Event) {
+  handleAuthorForm(
+    author: Author | undefined,
+    isEditing: boolean,
+    event: Event
+  ) {
     event.stopPropagation();
-    this.modalAuthorRef = this.modalController.open(AuthorModal, {
+    this.AuthorDialogRef = this.modalController.open(AuthorForm, {
       width: '50%',
       height: 'auto',
       dismissableMask: false,
       modal: true,
-      data: author,
+      data: {
+        author,
+        isEditing,
+      },
     });
-    this.modalAuthorRef.onClose.subscribe((result) => {
-      if (!result) this.modalAuthorRef.destroy();
-      if (result) {
-        console.log('Resultado del modal:', result);
-      }
+    this.AuthorDialogRef.onClose.subscribe((result) => {
+      if (!result) this.AuthorDialogRef.destroy();
     });
   }
 

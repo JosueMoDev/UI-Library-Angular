@@ -1,17 +1,17 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { AuthorModal } from './author-modal';
+import { GenreForm } from './genre-form';
 
-describe('AuthorModalComponent', () => {
-  let component: AuthorModal;
-  let fixture: ComponentFixture<AuthorModal>;
+describe('GenreModalComponent', () => {
+  let component: GenreForm;
+  let fixture: ComponentFixture<GenreForm>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [AuthorModal],
+      imports: [GenreForm],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(AuthorModal);
+    fixture = TestBed.createComponent(GenreForm);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

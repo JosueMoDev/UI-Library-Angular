@@ -1,10 +1,10 @@
 import { inject, Injectable } from '@angular/core';
-import { SupabaseService } from '@core/Supabase.service';
+import { SupabaseService } from '@services/Supabase.service';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { CreateAuthorDto } from '../dtos/create-author.dto';
 import { Author } from '../models/author.model';
 import { UpdateAuthorDto } from '../dtos/update-author.dto';
-import { AuthenticationService } from 'src/app/authentication/authentication.service';
+import { AuthenticationService } from '@services/authentication.service';
 
 @Injectable({
   providedIn: 'root',

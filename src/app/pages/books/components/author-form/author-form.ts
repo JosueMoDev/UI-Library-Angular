@@ -7,7 +7,6 @@ import {
   DialogService,
 } from 'primeng/dynamicdialog';
 import { InputText } from 'primeng/inputtext';
-import { Toast } from 'primeng/toast';
 import { ProgressBar } from 'primeng/progressbar';
 import { CommonModule } from '@angular/common';
 import { Steps } from 'primeng/steps';
@@ -23,7 +22,7 @@ import {
   CreateAuthorDto,
   CreateAuthorSchema,
 } from '@pages/books/dtos/create-author.dto';
-import { AuthenticationService } from 'src/app/authentication/authentication.service';
+import { AuthenticationService } from '@services/authentication.service';
 import {
   injectMutation,
   QueryClient,
@@ -52,14 +51,16 @@ import { Author } from '@pages/books/models/author.model';
     TableModule,
     MultiSelectModule,
   ],
-  templateUrl: './author-modal.html',
-  styleUrl: './author-modal.css',
+  templateUrl: './author-form.html',
+  styleUrl: './author-form.css',
 })
-export class AuthorModal {
+export class AuthorForm {
   private ref: DynamicDialogRef = inject(DynamicDialogRef);
   modalController: DialogService = inject(DialogService);
-  private configDialog: DynamicDialogConfig<object> =
-    inject(DynamicDialogConfig);
+  private configDialog: DynamicDialogConfig<{
+    author: Author | undefined;
+    isEditing: boolean;
+  }> = inject(DynamicDialogConfig);
   private fb = inject(FormBuilder);
   private config: PrimeNG = inject(PrimeNG);
   private msgService: MessageService = inject(MessageService);
@@ -159,9 +160,10 @@ export class AuthorModal {
   };
 
   ngOnInit(): void {
-    this.author = this.configDialog.data as Author;
-    if (this.author) {
-      this.isEditing = true;
+    this.author = this.configDialog.data?.author;
+    this.isEditing = this.configDialog.data?.isEditing ?? false;
+
+    if (this.author && this.isEditing) {
       this.form.patchValue(this.author);
       this.uploadedFile = {
         name: this.author.name,
@@ -304,15 +306,17 @@ export class AuthorModal {
         closeOnEscape: true,
         icon: 'pi pi-exclamation-triangle',
         rejectButtonProps: {
-          label: 'NO',
+          label: 'Cancelar',
           severity: 'secondary',
           outlined: true,
         },
         acceptButtonProps: {
-          label: 'SI',
+          label: 'Si, Cerrar',
         },
-        accept: () => this.ref.close(),
-        reject: () => {},
+        accept: () => {
+          this.confirmController.close();
+          this.ref.close();
+        },
       });
     }
     return this.ref.close();

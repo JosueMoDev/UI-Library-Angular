@@ -1,8 +1,8 @@
 import { inject, Injectable } from '@angular/core';
-import { SupabaseService } from '@core/Supabase.service';
+import { SupabaseService } from '@services/Supabase.service';
 import { IGenre } from '../interfaces/genre.interface';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { AuthenticationService } from 'src/app/authentication/authentication.service';
+import { AuthenticationService } from '@services/authentication.service';
 import { Genre } from '../models/genre.model';
 import { CreateGenreDto } from '../dtos/create-genre.dto';
 import { UpdateGenreDto } from '../dtos/update-genre.dto';

@@ -5,13 +5,15 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "@services/*": ["src/app/services/*"],
+      "@services/*": ["src/services/*"],
       "@pages/*": ["src/app/pages/*"],
-      "@core/*": ["src/app/core/*"],
-      "@shared/*": ["src/app/shared/*"],
-      "@environments/*": ["src/app/environments/*"],
-      "@utis/*": ["src/app/utils/*"],
-      "@plugis/*": ["src/app/plugins/*"],
+      "@core/*": ["src/core/*"],
+      "@shared/*": ["src/shared/*"],
+      "@environments/*": ["src/environments/*"],
+      "@utis/*": ["src/utils/*"],
+      "@plugis/*": ["src/plugins/*"],
+      "@pipes/*": ["src/pipes/*"],
+
     },
     "outDir": "./dist/out-tsc",
     "strict": true,

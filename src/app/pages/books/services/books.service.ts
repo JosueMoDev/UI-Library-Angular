@@ -1,11 +1,11 @@
 import { inject, Injectable } from '@angular/core';
 import { IBook } from '../interfaces/book.interface';
-import { SupabaseService } from '@core/Supabase.service';
+import { SupabaseService } from '@services/Supabase.service';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { CreateBookDto } from '../dtos/create-book.dto';
 import { Book } from '../models/book.model';
 import { UpdateBookDto } from '../dtos/update-book.dto';
-import { AuthenticationService } from 'src/app/authentication/authentication.service';
+import { AuthenticationService } from '@services/authentication.service';
 
 @Injectable({
   providedIn: 'root',

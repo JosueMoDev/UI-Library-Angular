@@ -5,11 +5,12 @@ import { BooksService } from '@pages/books/services/books.service';
 import { FormsModule } from '@angular/forms';
 import { SelectButton } from 'primeng/selectbutton';
 import { BookLayout } from '@pages/books/components/book-layout/book-layout';
-import { DialogService, DynamicDialogRef } from 'primeng/dynamicdialog';
-import { BookModal } from '../components/book-modal/book-modal';
 import { SkeletonBook } from '@pages/books/components/skeleton-book/skeleton-book';
 import { ButtonModule } from 'primeng/button';
 import { injectQuery } from '@tanstack/angular-query-experimental';
+import { DynamicDialogRef, DialogService } from 'primeng/dynamicdialog';
+import { Book } from '../models';
+import { BookForm } from '../components/book-form/book-form';
 
 @Component({
   selector: 'books-list',
@@ -27,10 +28,8 @@ import { injectQuery } from '@tanstack/angular-query-experimental';
   providers: [BooksService],
 })
 export default class BookList implements OnInit {
-  booksService = inject(BooksService);
-  modalController: DialogService = inject(DialogService);
-  private ref!: DynamicDialogRef;
-
+  private booksService = inject(BooksService);
+  private dialogController: DialogService = inject(DialogService);
   rows = 20;
   first = 0;
   totalRecords = 0;
@@ -63,16 +62,24 @@ export default class BookList implements OnInit {
   counterArray(n: number): any[] {
     return Array(n);
   }
-  addBook() {
-    this.ref = this.modalController.open(BookModal, {
+
+  handleDialogBook(
+    book: Book | undefined,
+    step: number,
+    isEditing: boolean,
+    event: Event
+  ) {
+    event.stopPropagation();
+    this.dialogController.open(BookForm, {
       width: '50%',
       height: 'auto',
       dismissableMask: false,
       modal: true,
-    });
-
-    this.ref.onClose.subscribe((result) => {
-      if (!result) this.ref.destroy();
+      data: {
+        book,
+        step,
+        isEditing,
+      },
     });
   }
 }

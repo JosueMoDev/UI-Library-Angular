@@ -18,7 +18,7 @@
           icon="pi pi-plus"
           label="Agregar"
           class="flex justify-items-end justify-self-end"
-          (click)="addBook()"
+          (click)="handleDialogBook(undefined, 0, false, $event)"
           [loading]="allBooks.isLoading()"
           [disabled]="allBooks.isPending()"
         ></button>

@@ -57,7 +57,7 @@
             <span>{{ genre.name }}</span>
             <p-button
               [rounded]="true"
-              (click)="editGenre(genre, $event)"
+              (click)="handleGenreForm(genre, true, $event)"
               [text]="true"
               icon="pi pi-pencil"
             />
@@ -77,7 +77,7 @@
         <ng-template #footer>
           <div class="p-3 flex justify-between">
             <p-button
-              (click)="addNewGenre()"
+              (click)="handleGenreForm(undefined, false, $event)"
               label="Add New"
               severity="primary"
               text
@@ -127,7 +127,7 @@
 
             <p-button
               [rounded]="true"
-              (click)="editAuthor(author, $event)"
+              (click)="handleAuthorForm(author, true, $event)"
               [text]="true"
               icon="pi pi-pencil"
             />
@@ -147,7 +147,7 @@
         <ng-template #footer>
           <div class="p-3 flex justify-between">
             <p-button
-              (click)="addAuthor()"
+              (click)="handleAuthorForm(undefined, false, $event)"
               label="Add New"
               severity="primary"
               text
