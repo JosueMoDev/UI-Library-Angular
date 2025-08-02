@@ -15,7 +15,7 @@ export class SupabaseService {
       {
         auth: {
           persistSession: false,
-          autoRefreshToken: false, // opcional, si no quieres que se auto-refresque
+          autoRefreshToken: false,
         },
       }
     );

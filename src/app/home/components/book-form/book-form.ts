@@ -17,32 +17,24 @@ import { PrimeNG } from 'primeng/config';
 import { Card } from 'primeng/card';
 import { IconFieldModule } from 'primeng/iconfield';
 import { TableModule } from 'primeng/table';
-import { AuthorsService } from '@pages/books/services/authors.service';
-import { GenresService } from '@pages/books/services/genres.service';
 import { MultiSelectModule } from 'primeng/multiselect';
 import {
   injectMutation,
   injectQuery,
   QueryClient,
 } from '@tanstack/angular-query-experimental';
-import { IGenre } from '@pages/books/interfaces/genre.interface';
-
-import { BooksService } from '@pages/books/services/books.service';
 import { AuthenticationService } from '@services/authentication.service';
-import { IAuthor } from '@pages/books/interfaces/author.interface';
-import {
-  UpdateBookDto,
-  UpdateBookSchema,
-} from '@pages/books/dtos/update-book.dto';
-import { Book } from '@pages/books/models/book.model';
-import {
-  CreateBookDto,
-  CreateBookSchema,
-} from '@pages/books/dtos/create-book.dto';
-import { Author } from '@pages/books/models/author.model';
-import { Genre } from '@pages/books/models/genre.model';
 import { GenreForm } from '../genre-form/genre-form';
 import { AuthorForm } from '../author-form/author-form';
+import {
+  CreateBookDto,
+  UpdateBookDto,
+  UpdateBookSchema,
+  CreateBookSchema,
+} from '@home/dtos';
+import { IAuthor, IGenre } from '@home/interfaces';
+import { Book, Genre, Author } from '@home/models';
+import { AuthorsService, GenresService, BooksService } from '@home/services';
 
 @Component({
   selector: 'book-form',

@@ -18,21 +18,19 @@ import { ConfirmDialog } from 'primeng/confirmdialog';
 import { IconFieldModule } from 'primeng/iconfield';
 import { TableModule } from 'primeng/table';
 import { MultiSelectModule } from 'primeng/multiselect';
-import {
-  CreateAuthorDto,
-  CreateAuthorSchema,
-} from '@pages/books/dtos/create-author.dto';
 import { AuthenticationService } from '@services/authentication.service';
 import {
   injectMutation,
   QueryClient,
 } from '@tanstack/angular-query-experimental';
-import { AuthorsService } from '@pages/books/services/authors.service';
 import {
+  CreateAuthorDto,
   UpdateAuthorDto,
   UpdateAuthorSchema,
-} from '@pages/books/dtos/update-author.dto';
-import { Author } from '@pages/books/models/author.model';
+  CreateAuthorSchema,
+} from '@home/dtos';
+import { Author } from '@home/models';
+import { AuthorsService } from '@home/services/authors.service';
 
 @Component({
   selector: 'app-author-modal',

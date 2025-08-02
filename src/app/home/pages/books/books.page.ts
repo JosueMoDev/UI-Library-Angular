@@ -1,33 +1,33 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { DataView } from 'primeng/dataview';
 import { CommonModule } from '@angular/common';
-import { BooksService } from '@pages/books/services/books.service';
 import { FormsModule } from '@angular/forms';
 import { SelectButton } from 'primeng/selectbutton';
-import { BookLayout } from '@pages/books/components/book-layout/book-layout';
-import { SkeletonBook } from '@pages/books/components/skeleton-book/skeleton-book';
 import { ButtonModule } from 'primeng/button';
 import { injectQuery } from '@tanstack/angular-query-experimental';
-import { DynamicDialogRef, DialogService } from 'primeng/dynamicdialog';
-import { Book } from '../models';
-import { BookForm } from '../components/book-form/book-form';
+import { DialogService } from 'primeng/dynamicdialog';
+import { BooksService } from '@home/services/books.service';
+import { Book } from '@home/models';
+import { BookForm } from '@home/components/book-form/book-form';
+import { SkeletonBook } from '@home/components/skeleton-book/skeleton-book';
+import { BookList } from '@home/components/book-list/book-list';
 
 @Component({
   selector: 'books-list',
-  templateUrl: './book-list.html',
-  styleUrls: ['./book-list.css'],
+  templateUrl: './books-page.html',
+  styleUrls: ['./books.page.css'],
   imports: [
     DataView,
     ButtonModule,
     CommonModule,
     SelectButton,
     FormsModule,
-    BookLayout,
     SkeletonBook,
+    BookList,
   ],
   providers: [BooksService],
 })
-export default class BookList implements OnInit {
+export default class BooksPage {
   private booksService = inject(BooksService);
   private dialogController: DialogService = inject(DialogService);
   rows = 20;
@@ -39,8 +39,6 @@ export default class BookList implements OnInit {
     queryFn: () => this.booksService.allBooks(),
     refetchOnMount: true,
   }));
-
-  async ngOnInit() {}
 
   onPageChange(event: any) {
     this.first = event.first;

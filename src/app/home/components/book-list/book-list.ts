@@ -1,28 +1,26 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject, input, ViewChild } from '@angular/core';
-import { IAuthor } from '@pages/books/interfaces/author.interface';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { Button } from 'primeng/button';
-import { Book } from '../../models/book.model';
 import { DialogService } from 'primeng/dynamicdialog';
-
 import {
   injectMutation,
   QueryClient,
 } from '@tanstack/angular-query-experimental';
-import { UpdateBookDto } from '@pages/books/dtos/update-book.dto';
-import { BooksService } from '@pages/books/services/books.service';
 import { AuthenticationService } from '@services/authentication.service';
 import { Popover } from 'primeng/popover';
 import { BookForm } from '../book-form/book-form';
+import { Author, Book } from '@home/models';
+import { BooksService } from '@home/services/books.service';
+import { UpdateBookDto } from '@home/dtos/update-book.dto';
 
 @Component({
-  selector: 'book-layout',
+  selector: 'book-list',
   imports: [CommonModule, Button, Popover],
-  templateUrl: './book-layout.html',
-  styleUrl: './book-layout.css',
+  templateUrl: './book-list.html',
+  styleUrl: './book-list.css',
 })
-export class BookLayout {
+export class BookList {
   @ViewChild('op') op!: Popover;
   private dialogController: DialogService = inject(DialogService);
   bookService = inject(BooksService);
@@ -45,7 +43,7 @@ export class BookLayout {
 
   getAuthors() {
     return this.book()
-      .authors.map((author: IAuthor) => `${author.name} ${author.lastname}`)
+      .authors.map((author: Author) => `${author.name} ${author.lastname}`)
       .join(', ');
   }
 

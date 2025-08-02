@@ -3,24 +3,23 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MessageService } from 'primeng/api';
 import { DynamicDialogConfig, DynamicDialogRef } from 'primeng/dynamicdialog';
 import { InputText } from 'primeng/inputtext';
-
+import { Card } from 'primeng/card';
+import { Button } from 'primeng/button';
 import {
   injectMutation,
   QueryClient,
 } from '@tanstack/angular-query-experimental';
-import {
-  CreateGenreDto,
-  CreateGenreSchema,
-} from '@pages/books/dtos/create-genre.dto';
-import { GenresService } from '@pages/books/services/genres.service';
+
 import { AuthenticationService } from '@services/authentication.service';
 import {
+  CreateGenreDto,
   UpdateGenreDto,
   UpdateGenreSchema,
-} from '@pages/books/dtos/update-genre.dto';
-import { Genre } from '@pages/books/models/genre.model';
-import { Card } from 'primeng/card';
-import { Button } from 'primeng/button';
+  CreateGenreSchema,
+} from '@home/dtos';
+import { Genre } from '@home/models';
+import { GenresService } from '@home/services';
+
 @Component({
   selector: 'genre-form',
   imports: [ReactiveFormsModule, Card, Button, InputText],

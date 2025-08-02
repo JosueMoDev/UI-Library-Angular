@@ -6,7 +6,7 @@
     "baseUrl": ".",
     "paths": {
       "@services/*": ["src/services/*"],
-      "@pages/*": ["src/app/pages/*"],
+      "@home/*": ["src/app/home/*"],
       "@core/*": ["src/core/*"],
       "@shared/*": ["src/shared/*"],
       "@environments/*": ["src/environments/*"],
