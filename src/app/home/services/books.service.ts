@@ -1,11 +1,11 @@
 import { inject, Injectable } from '@angular/core';
-import { IBook } from '../interfaces/book.interface';
 import { SupabaseService } from '@services/Supabase.service';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { CreateBookDto } from '../dtos/create-book.dto';
 import { Book } from '../models/book.model';
 import { UpdateBookDto } from '../dtos/update-book.dto';
 import { AuthenticationService } from '@services/authentication.service';
+import { StorageService } from './storage.service';
 
 @Injectable({
   providedIn: 'root',
@@ -14,6 +14,8 @@ export class BooksService {
   private supabaseService = inject(SupabaseService);
   private supabase: SupabaseClient = this.supabaseService.supabase;
   private auth = inject(AuthenticationService);
+
+  #storageService = inject(StorageService);
 
   async findBookById(id: string): Promise<Book> {
     const { data, error } = await this.supabase
@@ -204,32 +206,18 @@ export class BooksService {
     });
   }
 
-  async uploadFile(file: File, book: Book) {
-    const { data, error } = await this.supabase.storage
-      .from('books-covers')
-      .upload(`${file.name}`, file);
-    if (error) throw new Error(error.message);
-
-    await this.setCoverPictureUrl(data.path, book);
-  }
-
-  async setCoverPictureUrl(filename: string, book: Book) {
-    const { data, error } = await this.supabase.storage
-      .from('books-covers')
-      .createSignedUrl(filename, 604800, {
-        transform: {
-          width: 500,
-          height: 600,
-        },
-      });
-
-    if (error) return;
+  async uploadCover(file: File, book: Book) {
+    const { signedUrl } = await this.#storageService.uploadFile({
+      file,
+      filename: file.name,
+      bucket: 'books-covers',
+    });
 
     const { error: coverBookError } = await this.supabase
       .from('Books')
       .update({
-        cover_url: data.signedUrl,
-        cover_name: filename,
+        cover_url: signedUrl,
+        cover_name: file.name,
         updated_by: this.auth.getAuthenticatedUser(),
       })
       .eq('id', book.id);

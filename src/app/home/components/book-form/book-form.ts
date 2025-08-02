@@ -17,12 +17,8 @@ import { PrimeNG } from 'primeng/config';
 import { Card } from 'primeng/card';
 import { IconFieldModule } from 'primeng/iconfield';
 import { TableModule } from 'primeng/table';
+
 import { MultiSelectModule } from 'primeng/multiselect';
-import {
-  injectMutation,
-  injectQuery,
-  QueryClient,
-} from '@tanstack/angular-query-experimental';
 import { AuthenticationService } from '@services/authentication.service';
 import { GenreForm } from '../genre-form/genre-form';
 import { AuthorForm } from '../author-form/author-form';
@@ -35,6 +31,11 @@ import {
 import { IAuthor, IGenre } from '@home/interfaces';
 import { Book, Genre, Author } from '@home/models';
 import { AuthorsService, GenresService, BooksService } from '@home/services';
+import {
+  injectMutation,
+  injectQuery,
+  QueryClient,
+} from '@tanstack/angular-query-experimental';
 
 @Component({
   selector: 'book-form',
@@ -57,36 +58,28 @@ import { AuthorsService, GenresService, BooksService } from '@home/services';
   ],
 })
 export class BookForm {
-  private ref: DynamicDialogRef = inject(DynamicDialogRef);
-  private GenrDialogRef!: DynamicDialogRef;
-  private AuthorDialogRef!: DynamicDialogRef;
-  modalController: DialogService = inject(DialogService);
-
-  private configDialog: DynamicDialogConfig<{
+  // PRIMENG
+  #ref: DynamicDialogRef = inject(DynamicDialogRef);
+  #genreDialogRef!: DynamicDialogRef;
+  #authorDialogRef!: DynamicDialogRef;
+  #modalController: DialogService = inject(DialogService);
+  #configDialog: DynamicDialogConfig<{
     book: Book;
     step: number | undefined;
     isEditing: boolean;
   }> = inject(DynamicDialogConfig);
+  #config: PrimeNG = inject(PrimeNG);
+  #confirmController: ConfirmationService = inject(ConfirmationService);
 
-  private fb = inject(FormBuilder);
-  private config: PrimeNG = inject(PrimeNG);
-  private msgService: MessageService = inject(MessageService);
-  private confirmController: ConfirmationService = inject(ConfirmationService);
-  private authorService: AuthorsService = inject(AuthorsService);
-  private genresService: GenresService = inject(GenresService);
-  private bookService: BooksService = inject(BooksService);
-  private queryClient = inject(QueryClient);
-  private readonly auth = inject(AuthenticationService);
+  #fb = inject(FormBuilder);
+  #msgService = inject(MessageService);
+  #queryClient = inject(QueryClient);
 
-  allGenres = injectQuery(() => ({
-    queryKey: ['genres'],
-    queryFn: () => this.genresService.getGenres(),
-  }));
+  #genresService = inject(GenresService);
+  #authorService = inject(AuthorsService);
 
-  allAuthors = injectQuery(() => ({
-    queryKey: ['authors'],
-    queryFn: async () => await this.authorService.getAuthors(),
-  }));
+  #bookService = inject(BooksService);
+  readonly #auth = inject(AuthenticationService);
 
   step = signal<number>(0);
   steps: MenuItem[] | undefined;
@@ -99,7 +92,7 @@ export class BookForm {
   selectedGenres: any[] = [];
   isEditing!: boolean;
 
-  form = this.fb.group({
+  form = this.#fb.group({
     title: [<string>'', Validators.required],
     price: [<number>0, Validators.required],
     description: [<string>'', Validators.required],
@@ -108,20 +101,31 @@ export class BookForm {
     physical_enable: [false],
   });
 
-  createMutation = injectMutation(() => ({
+  allGenresQuery = injectQuery(() => ({
+    queryKey: ['genres'],
+    queryFn: () => this.#genresService.allGenres(),
+  }));
+
+  allAuthorsQuery = injectQuery(() => ({
+    queryKey: ['authors'],
+    queryFn: () => this.#authorService.allAuthors(),
+  }));
+
+  addBookMutation = injectMutation(() => ({
     mutationFn: async (dto: CreateBookDto) =>
-      await this.bookService.addBook(dto),
+      await this.#bookService.addBook(dto),
     onSuccess: () => {
-      this.msgService.add({
+      this.#msgService.add({
         severity: 'success',
         summary: 'Success',
         detail: 'Book was created successfully',
         life: 3000,
       });
-      this.queryClient.invalidateQueries({ queryKey: ['books'] });
+
+      this.#queryClient.invalidateQueries({ queryKey: ['books'] });
     },
     onError: (error) => {
-      this.msgService.add({
+      this.#msgService.add({
         severity: 'error',
         summary: 'Error',
         detail: `Error al guardar: ${error.message}`,
@@ -130,20 +134,20 @@ export class BookForm {
     },
   }));
 
-  updateMutation = injectMutation(() => ({
+  updateBookMutation = injectMutation(() => ({
     mutationFn: async (dto: UpdateBookDto) =>
-      await this.bookService.updateBook(dto),
+      await this.#bookService.updateBook(dto),
     onSuccess: () => {
-      this.msgService.add({
+      this.#msgService.add({
         severity: 'success',
         summary: 'Success',
         detail: 'Book was updated successfully',
         life: 3000,
       });
-      this.queryClient.invalidateQueries({ queryKey: ['books'] });
+      this.#queryClient.invalidateQueries({ queryKey: ['books'] });
     },
     onError: (error) => {
-      this.msgService.add({
+      this.#msgService.add({
         severity: 'error',
         summary: 'Error',
         detail: `Error al editar: ${error.message}`,
@@ -152,20 +156,20 @@ export class BookForm {
     },
   }));
 
-  fileMutation = injectMutation(() => ({
+  uploadFileMutation = injectMutation(() => ({
     mutationFn: async ({ dto, book }: { dto: File; book: Book }) =>
-      await this.bookService.uploadFile(dto, book),
+      await this.#bookService.uploadCover(dto, book),
     onSuccess: () => {
-      this.msgService.add({
+      this.#msgService.add({
         severity: 'success',
         summary: 'Success',
         detail: 'cover picture was uploaded successfully',
         life: 3000,
       });
-      this.queryClient.invalidateQueries({ queryKey: ['books'] });
+      this.#queryClient.invalidateQueries({ queryKey: ['books'] });
     },
     onError: (error) => {
-      this.msgService.add({
+      this.#msgService.add({
         severity: 'error',
         summary: 'Error',
         detail: `Error while upload cover picture: ${error.message}`,
@@ -177,9 +181,9 @@ export class BookForm {
   uploadedFiles: any[] = [];
 
   ngOnInit(): void {
-    this.book = this.configDialog.data?.book;
-    this.isEditing = this.configDialog.data!.isEditing;
-    this.step.set(this.configDialog.data?.step ?? 0);
+    this.book = this.#configDialog.data?.book;
+    this.isEditing = this.#configDialog.data!.isEditing;
+    this.step.set(this.#configDialog.data?.step ?? 0);
     if (this.book && this.isEditing) {
       this.form.patchValue({
         ...this.book,
@@ -211,11 +215,11 @@ export class BookForm {
         const result = UpdateBookSchema.safeParse({
           id: this.book.id,
           ...this.form.value,
-          updated_by: this.auth.getAuthenticatedUser(),
+          updated_by: this.#auth.getAuthenticatedUser(),
         } as UpdateBookDto);
         if (!result.success) {
           result.error.errors.map((err) =>
-            this.msgService.add({
+            this.#msgService.add({
               key: err.code,
               severity: 'error',
               summary: 'Error',
@@ -224,17 +228,17 @@ export class BookForm {
             })
           );
         }
-        await this.updateMutation.mutateAsync(result.data!);
-        this.ref.close();
+        await this.updateBookMutation.mutateAsync(result.data!);
+        this.#ref.close();
       }
       if (!this.isEditing) {
         const result = CreateBookSchema.safeParse({
           ...this.form.value,
-          created_by: this.auth.getAuthenticatedUser(),
+          created_by: this.#auth.getAuthenticatedUser(),
         } as CreateBookDto);
         if (!result.success) {
           result.error.errors.map((err: any) =>
-            this.msgService.add({
+            this.#msgService.add({
               key: err.code,
               severity: 'error',
               summary: 'Error',
@@ -243,15 +247,15 @@ export class BookForm {
             })
           );
         }
-        await this.createMutation.mutateAsync(result.data!);
-        this.ref.close();
+        await this.addBookMutation.mutateAsync(result.data!);
+        this.#ref.close();
       }
     }
   }
 
   closeDialog(event: Event) {
     if (this.form.touched) {
-      return this.confirmController.confirm({
+      return this.#confirmController.confirm({
         target: event.target as EventTarget,
         message: 'Estas seguro que deseas salir sin guardar?',
         header: 'Confirmation',
@@ -266,10 +270,10 @@ export class BookForm {
         acceptButtonProps: {
           label: 'Si, Cerrar',
         },
-        accept: () => this.ref.close(),
+        accept: () => this.#ref.close(),
       });
     }
-    return this.ref.close();
+    return this.#ref.close();
   }
   changeStep(event: number) {
     this.steps![event].visible;
@@ -283,7 +287,7 @@ export class BookForm {
 
   handleGenreForm(genre: Genre | undefined, isEditing: boolean, event: Event) {
     event.stopPropagation();
-    this.GenrDialogRef = this.modalController.open(GenreForm, {
+    this.#genreDialogRef = this.#modalController.open(GenreForm, {
       width: '50%',
       height: 'auto',
       dismissableMask: false,
@@ -294,8 +298,8 @@ export class BookForm {
         isEditing,
       },
     });
-    this.GenrDialogRef.onClose.subscribe((result) => {
-      if (!result) this.GenrDialogRef.destroy();
+    this.#genreDialogRef.onClose.subscribe((result) => {
+      if (!result) this.#genreDialogRef.destroy();
     });
   }
 
@@ -305,7 +309,7 @@ export class BookForm {
     event: Event
   ) {
     event.stopPropagation();
-    this.AuthorDialogRef = this.modalController.open(AuthorForm, {
+    this.#authorDialogRef = this.#modalController.open(AuthorForm, {
       width: '50%',
       height: 'auto',
       dismissableMask: false,
@@ -315,8 +319,8 @@ export class BookForm {
         isEditing,
       },
     });
-    this.AuthorDialogRef.onClose.subscribe((result) => {
-      if (!result) this.AuthorDialogRef.destroy();
+    this.#authorDialogRef.onClose.subscribe((result) => {
+      if (!result) this.#authorDialogRef.destroy();
     });
   }
 
@@ -354,12 +358,12 @@ export class BookForm {
   }
 
   onTemplatedUpload() {
-    this.msgService.add({
-      severity: 'info',
-      summary: 'Success',
-      detail: 'File Uploaded',
-      life: 3000,
-    });
+    // this.msgService.add({
+    //   severity: 'info',
+    //   summary: 'Success',
+    //   detail: 'File Uploaded',
+    //   life: 3000,
+    // });
   }
 
   onSelectedFiles(event: { currentFiles: File[] }) {
@@ -381,7 +385,7 @@ export class BookForm {
   }
 
   async uploadEvent() {
-    await this.fileMutation.mutateAsync({
+    await this.uploadFileMutation.mutateAsync({
       dto: this.file!,
       book: this.book!,
     });
@@ -392,7 +396,7 @@ export class BookForm {
     const dm = 3;
     const MAX_BYTES = 3 * k * k;
     const sizes: string[] | undefined =
-      this.config.translation.fileSizeTypes ?? [];
+      this.#config.translation.fileSizeTypes ?? [];
 
     if (bytes === 0) {
       return `0 ${sizes[0]}`;

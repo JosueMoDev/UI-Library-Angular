@@ -1,11 +1,7 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Button, ButtonModule } from 'primeng/button';
-import {
-  DynamicDialogRef,
-  DynamicDialogConfig,
-  DialogService,
-} from 'primeng/dynamicdialog';
+import { DynamicDialogRef, DynamicDialogConfig } from 'primeng/dynamicdialog';
 import { InputText } from 'primeng/inputtext';
 import { ProgressBar } from 'primeng/progressbar';
 import { CommonModule } from '@angular/common';
@@ -20,17 +16,18 @@ import { TableModule } from 'primeng/table';
 import { MultiSelectModule } from 'primeng/multiselect';
 import { AuthenticationService } from '@services/authentication.service';
 import {
-  injectMutation,
-  QueryClient,
-} from '@tanstack/angular-query-experimental';
-import {
-  CreateAuthorDto,
-  UpdateAuthorDto,
   UpdateAuthorSchema,
   CreateAuthorSchema,
+  CreateAuthorDto,
+  UpdateAuthorDto,
 } from '@home/dtos';
 import { Author } from '@home/models';
 import { AuthorsService } from '@home/services/authors.service';
+import {
+  QueryClient,
+  injectQuery,
+  injectMutation,
+} from '@tanstack/angular-query-experimental';
 
 @Component({
   selector: 'app-author-modal',
@@ -53,19 +50,18 @@ import { AuthorsService } from '@home/services/authors.service';
   styleUrl: './author-form.css',
 })
 export class AuthorForm {
-  private ref: DynamicDialogRef = inject(DynamicDialogRef);
-  modalController: DialogService = inject(DialogService);
-  private configDialog: DynamicDialogConfig<{
+  readonly #ref: DynamicDialogRef = inject(DynamicDialogRef);
+  readonly #configDialog: DynamicDialogConfig<{
     author: Author | undefined;
     isEditing: boolean;
   }> = inject(DynamicDialogConfig);
-  private fb = inject(FormBuilder);
-  private config: PrimeNG = inject(PrimeNG);
-  private msgService: MessageService = inject(MessageService);
-  private readonly auth = inject(AuthenticationService);
-  private confirmController: ConfirmationService = inject(ConfirmationService);
-  private authorService = inject(AuthorsService);
-  private queryClient = inject(QueryClient);
+  #fb = inject(FormBuilder);
+  #config: PrimeNG = inject(PrimeNG);
+  readonly #auth = inject(AuthenticationService);
+  #confirmController: ConfirmationService = inject(ConfirmationService);
+  #authorService = inject(AuthorsService);
+  #queryClient = inject(QueryClient);
+  #msgService = inject(MessageService);
 
   author: Author | undefined;
   isEditing: boolean = false;
@@ -78,7 +74,7 @@ export class AuthorForm {
   authors: any[] = [];
   selectedAuthors: any[] = [];
 
-  form = this.fb.group({
+  form = this.#fb.group({
     name: ['', Validators.required],
     lastname: ['', Validators.required],
     age: [0, Validators.required],
@@ -86,20 +82,30 @@ export class AuthorForm {
     // nationality: ['', Validators.required],
   });
 
-  createMutation = injectMutation(() => ({
+  uploadedFile!: {
+    name: string;
+    url: string | undefined;
+  };
+
+  allAuthorsQuery = injectQuery(() => ({
+    queryKey: ['authors'],
+    queryFn: async () => await this.#authorService.allAuthors(),
+  }));
+
+  addAuthorMutation = injectMutation(() => ({
     mutationFn: async (dto: CreateAuthorDto) =>
-      await this.authorService.addAuthor(dto),
+      await this.#authorService.addAuthor(dto),
     onSuccess: () => {
-      this.msgService.add({
+      this.#msgService.add({
         severity: 'success',
         summary: 'Success',
         detail: 'Author was created successfully',
         life: 3000,
       });
-      this.queryClient.invalidateQueries({ queryKey: ['authors'] });
+      this.#queryClient.invalidateQueries({ queryKey: ['authors'] });
     },
     onError: (error) => {
-      this.msgService.add({
+      this.#msgService.add({
         severity: 'error',
         summary: 'Error',
         detail: `Error al guardar: ${error.message}`,
@@ -108,20 +114,20 @@ export class AuthorForm {
     },
   }));
 
-  fileMutation = injectMutation(() => ({
+  uploadFileMutation = injectMutation(() => ({
     mutationFn: async ({ dto, author }: { dto: File; author: Author }) =>
-      await this.authorService.uploadFile(dto, author),
+      await this.#authorService.updateProfilePicture(dto, author),
     onSuccess: () => {
-      this.msgService.add({
+      this.#msgService.add({
         severity: 'success',
         summary: 'Success',
         detail: 'profile picture was uploaded successfully',
         life: 3000,
       });
-      this.queryClient.invalidateQueries({ queryKey: ['authors'] });
+      this.#queryClient.invalidateQueries({ queryKey: ['authors'] });
     },
     onError: (error) => {
-      this.msgService.add({
+      this.#msgService.add({
         severity: 'error',
         summary: 'Error',
         detail: `Error while upload profile picture: ${error.message}`,
@@ -130,20 +136,20 @@ export class AuthorForm {
     },
   }));
 
-  updateMutation = injectMutation(() => ({
+  updateActorMutation = injectMutation(() => ({
     mutationFn: async (dto: UpdateAuthorDto) =>
-      await this.authorService.updateAuthor(dto),
+      await this.#authorService.updateAuthor(dto),
     onSuccess: () => {
-      this.msgService.add({
+      this.#msgService.add({
         severity: 'success',
         summary: 'Success',
         detail: 'Author was updated successfully',
         life: 3000,
       });
-      this.queryClient.invalidateQueries({ queryKey: ['authors'] });
+      this.#queryClient.invalidateQueries({ queryKey: ['authors'] });
     },
     onError: (error) => {
-      this.msgService.add({
+      this.#msgService.add({
         severity: 'error',
         summary: 'Error',
         detail: `Error al actualizar: ${error.message}`,
@@ -152,14 +158,9 @@ export class AuthorForm {
     },
   }));
 
-  uploadedFile!: {
-    name: string;
-    url: string | undefined;
-  };
-
   ngOnInit(): void {
-    this.author = this.configDialog.data?.author;
-    this.isEditing = this.configDialog.data?.isEditing ?? false;
+    this.author = this.#configDialog.data?.author;
+    this.isEditing = this.#configDialog.data?.isEditing ?? false;
 
     if (this.author && this.isEditing) {
       this.form.patchValue(this.author);
@@ -187,11 +188,11 @@ export class AuthorForm {
         const result = UpdateAuthorSchema.safeParse({
           id: this.author.id,
           ...this.form.value,
-          updated_by: this.auth.getAuthenticatedUser(),
+          updated_by: this.#auth.getAuthenticatedUser(),
         });
         if (!result.success) {
           result.error.errors.map((err) =>
-            this.msgService.add({
+            this.#msgService.add({
               key: err.code,
               severity: 'error',
               summary: 'Error',
@@ -200,18 +201,18 @@ export class AuthorForm {
             })
           );
         }
-        await this.updateMutation.mutateAsync(result.data!);
-        this.ref.close();
+        await this.updateActorMutation.mutateAsync(result.data!);
+        this.#ref.close();
       }
 
       if (!this.isEditing) {
         const result = CreateAuthorSchema.safeParse({
           ...this.form.value,
-          created_by: this.auth.getAuthenticatedUser(),
+          created_by: this.#auth.getAuthenticatedUser(),
         });
         if (!result.success) {
           result.error.errors.map((err) =>
-            this.msgService.add({
+            this.#msgService.add({
               key: err.code,
               severity: 'error',
               summary: 'Error',
@@ -220,8 +221,8 @@ export class AuthorForm {
             })
           );
         }
-        await this.createMutation.mutateAsync(result.data!);
-        this.ref.close();
+        await this.addAuthorMutation.mutateAsync(result.data!);
+        this.#ref.close();
       }
     }
   }
@@ -240,7 +241,7 @@ export class AuthorForm {
   }
 
   onTemplatedUpload() {
-    this.msgService.add({
+    this.#msgService.add({
       severity: 'info',
       summary: 'Success',
       detail: 'File Uploaded',
@@ -267,7 +268,7 @@ export class AuthorForm {
   }
 
   async uploadEvent() {
-    await this.fileMutation.mutateAsync({
+    await this.uploadFileMutation.mutateAsync({
       dto: this.file!,
       author: this.author!,
     });
@@ -278,7 +279,7 @@ export class AuthorForm {
     const dm = 3;
     const MAX_BYTES = 3 * k * k;
     const sizes: string[] | undefined =
-      this.config.translation.fileSizeTypes ?? [];
+      this.#config.translation.fileSizeTypes ?? [];
 
     if (bytes === 0) {
       return `0 ${sizes[0]}`;
@@ -296,7 +297,7 @@ export class AuthorForm {
 
   closeDialog(event: Event) {
     if (this.form.touched) {
-      return this.confirmController.confirm({
+      return this.#confirmController.confirm({
         target: event.target as EventTarget,
         message: 'Estas seguro que deseas salir sin guardar?',
         header: 'Confirmation',
@@ -312,12 +313,12 @@ export class AuthorForm {
           label: 'Si, Cerrar',
         },
         accept: () => {
-          this.confirmController.close();
-          this.ref.close();
+          this.#confirmController.close();
+          this.#ref.close();
         },
       });
     }
-    return this.ref.close();
+    return this.#ref.close();
   }
   changeStep(event: number) {
     this.steps![event].visible;

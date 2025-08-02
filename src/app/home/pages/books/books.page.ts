@@ -4,13 +4,13 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SelectButton } from 'primeng/selectbutton';
 import { ButtonModule } from 'primeng/button';
-import { injectQuery } from '@tanstack/angular-query-experimental';
 import { DialogService } from 'primeng/dynamicdialog';
 import { BooksService } from '@home/services/books.service';
 import { Book } from '@home/models';
 import { BookForm } from '@home/components/book-form/book-form';
 import { SkeletonBook } from '@home/components/skeleton-book/skeleton-book';
 import { BookList } from '@home/components/book-list/book-list';
+import { injectQuery } from '@tanstack/angular-query-experimental';
 
 @Component({
   selector: 'books-list',
@@ -28,15 +28,15 @@ import { BookList } from '@home/components/book-list/book-list';
   providers: [BooksService],
 })
 export default class BooksPage {
-  private booksService = inject(BooksService);
+  #booksService = inject(BooksService);
   private dialogController: DialogService = inject(DialogService);
   rows = 20;
   first = 0;
   totalRecords = 0;
 
-  allBooks = injectQuery(() => ({
+  allBooksQuery = injectQuery(() => ({
     queryKey: ['books'],
-    queryFn: () => this.booksService.allBooks(),
+    queryFn: () => this.#booksService.allBooks(),
     refetchOnMount: true,
   }));
 

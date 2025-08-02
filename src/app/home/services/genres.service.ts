@@ -2,11 +2,9 @@ import { inject, Injectable } from '@angular/core';
 import { SupabaseService } from '@services/Supabase.service';
 import { IGenre } from '../interfaces/genre.interface';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { AuthenticationService } from '@services/authentication.service';
 import { Genre } from '../models/genre.model';
 import { CreateGenreDto } from '../dtos/create-genre.dto';
 import { UpdateGenreDto } from '../dtos/update-genre.dto';
-
 @Injectable({
   providedIn: 'root',
 })
@@ -45,7 +43,7 @@ export class GenresService {
     return data as IGenre;
   }
 
-  async getGenres(): Promise<IGenre[]> {
+  async allGenres(): Promise<IGenre[]> {
     const { data, error } = await this.supabase.from('Genres').select('*');
     if (error) {
       throw new Error(error.message);

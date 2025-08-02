@@ -23,7 +23,7 @@
         label="Guardar"
         type="submit"
         severity="success"
-        [loading]=" isEditing ? updateMutation.isPending() : createMutation.isPending()"
+        [loading]=" isEditing ? updateGenreMutation.isPending() : addGenreMutation.isPending()"
         [disabled]="form.invalid"
       />
     </div>

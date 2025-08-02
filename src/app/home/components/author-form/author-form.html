@@ -63,12 +63,12 @@
               [rounded]="true"
               [outlined]="true"
               severity="success"
-              [disabled]="fileMutation.isPending()"
+              [disabled]="uploadFileMutation.isPending()"
             />
           </div>
 
           <p-progressbar
-            *ngIf="fileMutation.isPending()"
+            *ngIf="uploadFileMutation.isPending()"
             [value]="totalSizePercent"
             [showValue]="false"
             class="w-full"
@@ -108,7 +108,7 @@
         type="submit"
         severity="success"
         [disabled]="form.invalid"
-        [loading]="isEditing ? createMutation.isPending() : updateMutation.isPending()"
+        [loading]="isEditing ? updateActorMutation.isPending() : addAuthorMutation.isPending()"
         (onClick)="submit()"
       />
     </div>

@@ -31,7 +31,6 @@ export class AppComponent {
   private readonly appService: AppService = inject(AppService);
   async ngOnInit() {
     await this.auth.signInWithCredentials();
-    console.log(this.auth.getBearerToken());
   }
   get drawerState(): boolean {
     return this.appService.drawerState;

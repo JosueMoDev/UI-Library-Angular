@@ -5,6 +5,7 @@ import { CreateAuthorDto } from '../dtos/create-author.dto';
 import { Author } from '../models/author.model';
 import { UpdateAuthorDto } from '../dtos/update-author.dto';
 import { AuthenticationService } from '@services/authentication.service';
+import { StorageService } from './storage.service';
 
 @Injectable({
   providedIn: 'root',
@@ -13,6 +14,7 @@ export class AuthorsService {
   private supabaseService = inject(SupabaseService);
   private supabase: SupabaseClient = this.supabaseService.supabase;
   private auth = inject(AuthenticationService);
+  #storageService = inject(StorageService);
 
   async addAuthor(author: CreateAuthorDto): Promise<Author> {
     const { data, error } = await this.supabase
@@ -41,7 +43,7 @@ export class AuthorsService {
     return data as Author;
   }
 
-  async getAuthors(): Promise<Author[]> {
+  async allAuthors(): Promise<Author[]> {
     const { data, error } = await this.supabase.from('Authors').select('*');
     if (error) {
       throw new Error(error.message);
@@ -50,30 +52,16 @@ export class AuthorsService {
     return authorsMappeds;
   }
 
-  async uploadFile(file: File, author: Author) {
-    const { data, error } = await this.supabase.storage
-      .from('author-profile')
-      .upload(`${file.name}`, file);
-    if (error) throw new Error(error.message);
-
-    this.setProfilePictureUrl(data.path, author);
-  }
-
-  async setProfilePictureUrl(filename: string, author: Author) {
-    const { data, error } = await this.supabase.storage
-      .from('author-profile')
-      .createSignedUrl(filename, 604800, {
-        transform: {
-          width: 500,
-          height: 600,
-        },
-      });
-
-    if (error) return;
+  async updateProfilePicture(file: File, author: Author) {
+    const { signedUrl } = await this.#storageService.uploadFile({
+      file,
+      filename: file.name,
+      bucket: 'author-profile',
+    });
     await this.updateAuthor({
       id: author.id,
       updated_by: this.auth.getAuthenticatedUser()!,
-      profile_picture_url: data.signedUrl,
+      profile_picture_url: signedUrl,
     });
   }
 }

@@ -1,9 +1,9 @@
 <div class="card">
   <p-dataview
     #dv
-    [value]="allBooks.data()"
+    [value]="allBooksQuery.data()"
     layout="list"
-    [paginator]="!!allBooks.data()"
+    [paginator]="!!allBooksQuery.data()"
     [rows]="rows"
     [totalRecords]="totalRecords"
     [first]="first"
@@ -19,8 +19,8 @@
           label="Agregar"
           class="flex justify-items-end justify-self-end"
           (click)="handleDialogBook(undefined, 0, false, $event)"
-          [loading]="allBooks.isLoading()"
-          [disabled]="allBooks.isPending()"
+          [loading]="allBooksQuery.isLoading()"
+          [disabled]="allBooksQuery.isPending()"
         ></button>
       </div>
     </ng-template>
@@ -28,7 +28,8 @@
     <ng-template #list let-items>
       @for (book of items; track $index) {
       <book-list [book]="book" />
-      }@empty { @if(!allBooks.isLoading() && !allBooks.data()?.length){
+      }@empty { @if(!allBooksQuery.isLoading() &&
+      !allBooksQuery.data()?.length){
       <h1>No hay Libros que mostrar!</h1>
       } @else { @for ( i of counterArray(8); track $index) {
       <book-skeleton />

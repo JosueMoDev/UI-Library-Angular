@@ -40,7 +40,7 @@
       <label for="description">Description</label>
 
       <p-multiselect
-        [options]="allGenres.data()"
+        [options]="allGenresQuery.data()"
         formControlName="genres"
         placeholder="Select Some Genres"
         optionLabel="name"
@@ -97,7 +97,7 @@
       </p-multiselect>
 
       <p-multiselect
-        [options]="allAuthors.data()"
+        [options]="allAuthorsQuery.data()"
         formControlName="authors"
         placeholder="Select Some Authors"
         styleClass="w-full mb-10"
@@ -199,12 +199,12 @@
               [rounded]="true"
               [outlined]="true"
               severity="success"
-              [disabled]="fileMutation.isPending() || !file"
+              [disabled]="uploadFileMutation.isPending() || !file"
             />
           </div>
 
           <p-progressbar
-            *ngIf="fileMutation.isPending()"
+            *ngIf="uploadFileMutation.isPending()"
             [value]="totalSizePercent"
             [showValue]="false"
             class="w-full"
@@ -241,8 +241,8 @@
         styleClass="w-full"
         type="submit"
         severity="success"
-        [disabled]="form.invalid || (isEditing ? updateMutation.isPending() : createMutation.isPending())"
-        [loading]="isEditing ? updateMutation.isPending() : createMutation.isPending()"
+        [disabled]="form.invalid || (isEditing ? updateBookMutation.isPending() : addBookMutation.isPending())"
+        [loading]="isEditing ? updateBookMutation.isPending() : addBookMutation.isPending()"
         (onClick)="submit()"
       ></p-button>
       }
