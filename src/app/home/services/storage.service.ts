@@ -30,7 +30,7 @@ export class StorageService {
   async signedUrl(filename: string, bucket: string) {
     return await this.#supabase.storage
       .from(bucket)
-      .createSignedUrl(filename, 604800, {
+      .createSignedUrl(filename, 31536000, {
         transform: {
           width: 500,
           height: 600,

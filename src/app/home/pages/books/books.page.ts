@@ -1,5 +1,4 @@
 import { Component, inject } from '@angular/core';
-import { DataView } from 'primeng/dataview';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SelectButton } from 'primeng/selectbutton';
@@ -11,26 +10,27 @@ import { BookForm } from '@home/components/book-form/book-form';
 import { SkeletonBook } from '@home/components/skeleton-book/skeleton-book';
 import { BookList } from '@home/components/book-list/book-list';
 import { injectQuery } from '@tanstack/angular-query-experimental';
+import { Paginator } from 'primeng/paginator';
 
 @Component({
   selector: 'books-list',
   templateUrl: './books-page.html',
   styleUrls: ['./books.page.css'],
   imports: [
-    DataView,
     ButtonModule,
     CommonModule,
     SelectButton,
     FormsModule,
     SkeletonBook,
     BookList,
+    Paginator,
   ],
   providers: [BooksService],
 })
 export default class BooksPage {
   #booksService = inject(BooksService);
   private dialogController: DialogService = inject(DialogService);
-  rows = 20;
+  rows = 5;
   first = 0;
   totalRecords = 0;
 
@@ -41,20 +41,9 @@ export default class BooksPage {
   }));
 
   onPageChange(event: any) {
+    this.rows = event.rows;
     this.first = event.first;
-  }
-
-  getSeverity(book: any) {
-    switch (book.inventoryStatus) {
-      case 'INSTOCK':
-        return 'success';
-      case 'LOWSTOCK':
-        return 'warn';
-      case 'OUTOFSTOCK':
-        return 'danger';
-      default:
-        return null;
-    }
+    this.totalRecords = this.allBooksQuery.data()?.length ?? 0;
   }
 
   counterArray(n: number): any[] {
