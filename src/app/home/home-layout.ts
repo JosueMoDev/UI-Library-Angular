@@ -5,8 +5,12 @@ import { BookQuery } from './components/book-query/book-query';
 @Component({
   selector: 'home-layout',
   imports: [RouterOutlet, BookQuery],
-  templateUrl: './home-layout.html',
-  styleUrl: './home-layout.css',
+  template: `<div class="flex flex-col h-screen">
+    <book-query />
+    <div class="flex-1 overflow-y-auto">
+      <router-outlet></router-outlet>
+    </div>
+  </div>`,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class HomeLayout {}

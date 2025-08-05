@@ -18,8 +18,20 @@ import { ConfirmDialog } from 'primeng/confirmdialog';
     ToastModule,
     ConfirmDialog,
   ],
-  templateUrl: './app.component.html',
-  styleUrl: './app.component.css',
+  template: `
+    @if(this.auth.getBearerToken()){
+    <sidebar-componet />
+    <div
+      class="transition-all duration-300"
+      [ngClass]="{ 'ml-80': drawerState, 'ml-0': !drawerState }"
+    >
+      <p-toast position="top-right"></p-toast>
+      <p-confirmdialog />
+
+      <router-outlet />
+    </div>
+    }
+  `,
   providers: [DialogService, MessageService, ConfirmationService],
 })
 export class AppComponent {

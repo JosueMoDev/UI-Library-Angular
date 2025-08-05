@@ -4,7 +4,6 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
   selector: 'authors-page',
   imports: [],
   template: `<p>Authors works!</p>`,
-  styleUrl: './authors-page.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class AuthorsPage {}
