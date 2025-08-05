@@ -7,6 +7,7 @@ import { StyleClass } from 'primeng/styleclass';
 import { Drawer } from 'primeng/drawer';
 import { AppService } from '../../../services/app.service';
 import { CommonModule } from '@angular/common';
+import { ActivatedRoute, RouterLink, RouterLinkActive } from '@angular/router';
 @Component({
   selector: 'sidebar-componet',
   imports: [
@@ -16,6 +17,8 @@ import { CommonModule } from '@angular/common';
     AvatarModule,
     StyleClass,
     CommonModule,
+    RouterLink,
+    RouterLinkActive,
   ],
   templateUrl: './sidebar.component.html',
   styleUrl: './sidebar.component.css',
@@ -23,7 +26,7 @@ import { CommonModule } from '@angular/common';
 export class SidebarComponent {
   @ViewChild('drawerRef') drawerRef!: Drawer;
   private readonly appService: AppService = inject(AppService);
-  visible: boolean = false;
+  visible: boolean = true;
 
   closeCallback(e: Event): void {
     this.appService.setDrawerState(false);

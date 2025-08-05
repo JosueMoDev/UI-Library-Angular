@@ -12,10 +12,15 @@ import { Button } from 'primeng/button';
       <p-iconfield class="flex w-full">
         <p-inputicon class="pi pi-search" />
         <input
-          class="w-full px-8 py-2 border border-gray-300 rounded-md"
+          class="w-full px-10 py-2 border border-gray-300 rounded-md"
           type="text"
           pInputText
           placeholder="Search"
+        />
+        <p-inputicon
+          severity="danger"
+          class="pi pi-times cursor-pointer hover:text-red-500"
+          (click)="onClearQuery()"
         />
       </p-iconfield>
       <p-button
@@ -42,6 +47,10 @@ export class BookQuery {
   query: string | undefined;
   openDrawer() {
     this.drawerVisible = true;
+  }
+
+  onClearQuery() {
+    console.log('borrando query');
   }
 
   onSearch(query: string) {

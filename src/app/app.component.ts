@@ -1,7 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { SidebarComponent } from '@shared/components/sidebar/sidebar.component';
-import { MenubarComponent } from '@shared/components/menubar/menubar.component';
 import { AppService } from '@services/app.service';
 import { CommonModule } from '@angular/common';
 import { DialogService } from 'primeng/dynamicdialog';
