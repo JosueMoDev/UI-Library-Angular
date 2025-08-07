@@ -254,7 +254,7 @@ export class BookForm {
   }
 
   closeDialog(event: Event) {
-    if (this.form.touched) {
+    if (this.form.dirty) {
       return this.#confirmController.confirm({
         target: event.target as EventTarget,
         message: 'Estas seguro que deseas salir sin guardar?',

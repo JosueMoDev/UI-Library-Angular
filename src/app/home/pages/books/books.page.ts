@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SelectButton } from 'primeng/selectbutton';
 import { ButtonModule } from 'primeng/button';
-import { DialogService } from 'primeng/dynamicdialog';
+import { DialogService, DynamicDialogRef } from 'primeng/dynamicdialog';
 import { BooksService } from '@home/services/books.service';
 import { Book } from '@home/models';
 import { BookForm } from '@home/components/book-form/book-form';
@@ -58,7 +58,7 @@ import { Paginator } from 'primeng/paginator';
     BookList,
     Paginator,
   ],
-  providers: [BooksService],
+  providers: [BooksService, DynamicDialogRef],
 })
 export default class BooksPage {
   #booksService = inject(BooksService);

@@ -1,8 +1,0 @@
-.custom-menuitem-danger {
-  background-color: #f44336;
-  color: white;
-}
-::ng-deep .menu-no-border {
-  border: none !important;
-  box-shadow: none !important;
-}
