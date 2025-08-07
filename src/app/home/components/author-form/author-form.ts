@@ -3,14 +3,10 @@ import { FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Button, ButtonModule } from 'primeng/button';
 import { DynamicDialogRef, DynamicDialogConfig } from 'primeng/dynamicdialog';
 import { InputText } from 'primeng/inputtext';
-import { ProgressBar } from 'primeng/progressbar';
 import { CommonModule } from '@angular/common';
 import { Steps } from 'primeng/steps';
 import { ConfirmationService, MenuItem, MessageService } from 'primeng/api';
-import { FileUpload } from 'primeng/fileupload';
-import { PrimeNG } from 'primeng/config';
 import { Card } from 'primeng/card';
-import { ConfirmDialog } from 'primeng/confirmdialog';
 import { IconFieldModule } from 'primeng/iconfield';
 import { TableModule } from 'primeng/table';
 import { MultiSelectModule } from 'primeng/multiselect';
@@ -23,6 +19,7 @@ import {
 } from '@home/dtos';
 import { Author } from '@home/models';
 import { AuthorsService } from '@home/services/authors.service';
+import { UploadFileComponent } from '../upload-file/upload-file';
 import {
   QueryClient,
   injectQuery,
@@ -37,17 +34,88 @@ import {
     ReactiveFormsModule,
     InputText,
     Button,
-    ProgressBar,
     Steps,
-    FileUpload,
     Card,
-    ConfirmDialog,
     IconFieldModule,
     TableModule,
     MultiSelectModule,
+    UploadFileComponent,
   ],
-  templateUrl: './author-form.html',
-  styleUrl: './author-form.css',
+  template: `<p-card>
+    <div class="absolute top-0 right-0 p-2">
+      <button
+        class="p-button p-button-text p-button-rounded"
+        (click)="closeDialog($event)"
+      >
+        <i class="pi pi-times"></i>
+      </button>
+    </div>
+    <ng-template #header>
+      <div class="card pb-3 ng">
+        <p-steps
+          [model]="steps"
+          [readonly]="false"
+          [activeIndex]="step()"
+          (activeIndexChange)="step.set($event)"
+        />
+      </div>
+    </ng-template>
+    <ng-template #title> Crear Author </ng-template>
+    <form class="m-5" [formGroup]="form">
+      @if(step() === 0) {
+      <div class="grid gap-4">
+        <input pInputText formControlName="name" placeholder="Name" />
+        <input pInputText formControlName="lastname" placeholder="Lastname" />
+        <input
+          pInputText
+          type="number"
+          formControlName="age"
+          placeholder="Age"
+        />
+
+        <textarea
+          pInputText
+          pSize="large"
+          id="biography"
+          formControlName="biography"
+          rows="5"
+          cols="30"
+        ></textarea>
+        <label for="description">Biography</label>
+      </div>
+      } @if (step() === 1) {
+      <upload-file
+        [dto]="{ id: author!.id, bucket: 'author-profile', uploadFn }"
+      />
+
+      }
+
+      <div class="flex justify-between mt-6"></div>
+    </form>
+    <ng-template #footer>
+      <div class="flex gap-4 mt-1">
+        <p-button
+          label="Guardar"
+          class="w-full"
+          styleClass="w-full"
+          type="submit"
+          severity="success"
+          [disabled]="
+            form.invalid ||
+            (isEditing
+              ? updateActorMutation.isPending()
+              : addAuthorMutation.isPending())
+          "
+          [loading]="
+            isEditing
+              ? updateActorMutation.isPending()
+              : addAuthorMutation.isPending()
+          "
+          (onClick)="submit()"
+        ></p-button>
+      </div>
+    </ng-template>
+  </p-card>`,
 })
 export class AuthorForm {
   readonly #ref: DynamicDialogRef = inject(DynamicDialogRef);
@@ -56,7 +124,6 @@ export class AuthorForm {
     isEditing: boolean;
   }> = inject(DynamicDialogConfig);
   #fb = inject(FormBuilder);
-  #config: PrimeNG = inject(PrimeNG);
   readonly #auth = inject(AuthenticationService);
   #confirmController: ConfirmationService = inject(ConfirmationService);
   #authorService = inject(AuthorsService);
@@ -68,9 +135,6 @@ export class AuthorForm {
 
   step = signal<number>(0);
   steps: MenuItem[] | undefined;
-  file!: File | null;
-  totalSize: number = 0;
-  totalSizePercent: number = 0;
   authors: any[] = [];
   selectedAuthors: any[] = [];
 
@@ -81,11 +145,6 @@ export class AuthorForm {
     biography: ['', Validators.required],
     // nationality: ['', Validators.required],
   });
-
-  uploadedFile!: {
-    name: string;
-    url: string | undefined;
-  };
 
   allAuthorsQuery = injectQuery(() => ({
     queryKey: ['authors'],
@@ -109,28 +168,6 @@ export class AuthorForm {
         severity: 'error',
         summary: 'Error',
         detail: `Error al guardar: ${error.message}`,
-        life: 3000,
-      });
-    },
-  }));
-
-  uploadFileMutation = injectMutation(() => ({
-    mutationFn: async ({ dto, author }: { dto: File; author: Author }) =>
-      await this.#authorService.updateProfilePicture(dto, author),
-    onSuccess: () => {
-      this.#msgService.add({
-        severity: 'success',
-        summary: 'Success',
-        detail: 'profile picture was uploaded successfully',
-        life: 3000,
-      });
-      this.#queryClient.invalidateQueries({ queryKey: ['authors'] });
-    },
-    onError: (error) => {
-      this.#msgService.add({
-        severity: 'error',
-        summary: 'Error',
-        detail: `Error while upload profile picture: ${error.message}`,
         life: 3000,
       });
     },
@@ -164,10 +201,10 @@ export class AuthorForm {
 
     if (this.author && this.isEditing) {
       this.form.patchValue(this.author);
-      this.uploadedFile = {
-        name: this.author.name,
-        url: this.author.profile_picture_url,
-      };
+      // this.uploadedFile = {
+      //   name: this.author.name,
+      //   url: this.author.profile_picture_url,
+      // };
     }
 
     this.steps = [
@@ -226,77 +263,9 @@ export class AuthorForm {
       }
     }
   }
-  choose(event: Event, callback: CallableFunction) {
-    callback();
-  }
-
-  onRemoveTemplatingFile() {
-    this.file = null;
-  }
-
-  onClearTemplatingUpload(clear: CallableFunction) {
-    clear();
-    this.totalSize = 0;
-    this.totalSizePercent = 0;
-  }
-
-  onTemplatedUpload() {
-    this.#msgService.add({
-      severity: 'info',
-      summary: 'Success',
-      detail: 'File Uploaded',
-      life: 3000,
-    });
-  }
-
-  onSelectedFiles(event: { currentFiles: File[] }) {
-    const MAX_BYTES = 3 * 1024 * 1024; // 3 MB
-
-    const originalFile = event.currentFiles[0];
-    const extension = originalFile.name.split('.').pop()?.toLowerCase();
-
-    const newFileName = `${this.author?.id}.${extension}`;
-
-    const renamedFile = new File([originalFile], newFileName, {
-      type: originalFile.type,
-    });
-
-    this.file = renamedFile;
-
-    this.totalSize = this.file.size;
-    this.totalSizePercent = Math.min((this.totalSize / MAX_BYTES) * 100, 100);
-  }
-
-  async uploadEvent() {
-    await this.uploadFileMutation.mutateAsync({
-      dto: this.file!,
-      author: this.author!,
-    });
-  }
-
-  formatSize(bytes: any) {
-    const k = 1024;
-    const dm = 3;
-    const MAX_BYTES = 3 * k * k;
-    const sizes: string[] | undefined =
-      this.#config.translation.fileSizeTypes ?? [];
-
-    if (bytes === 0) {
-      return `0 ${sizes[0]}`;
-    }
-
-    if (bytes > MAX_BYTES) {
-      return `> 3 ${sizes[2] ?? 'MB'}`;
-    }
-
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    const formattedSize = parseFloat((bytes / Math.pow(k, i)).toFixed(dm));
-
-    return `${formattedSize} ${sizes[i]}`;
-  }
 
   closeDialog(event: Event) {
-    if (this.form.touched) {
+    if (this.form.dirty) {
       return this.#confirmController.confirm({
         target: event.target as EventTarget,
         message: 'Estas seguro que deseas salir sin guardar?',
@@ -312,15 +281,16 @@ export class AuthorForm {
         acceptButtonProps: {
           label: 'Si, Cerrar',
         },
-        accept: () => {
-          this.#confirmController.close();
-          this.#ref.close();
-        },
+        accept: () => this.#ref.close({ hasFiles: true }),
       });
     }
     return this.#ref.close();
   }
   changeStep(event: number) {
     this.steps![event].visible;
+  }
+
+  get uploadFn() {
+    return this.#authorService.updateProfilePicture.bind(this.#authorService);
   }
 }

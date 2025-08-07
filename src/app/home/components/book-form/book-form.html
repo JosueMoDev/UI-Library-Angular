@@ -100,7 +100,6 @@
         [options]="allAuthorsQuery.data()"
         formControlName="authors"
         placeholder="Select Some Authors"
-        styleClass="w-full mb-10"
         optionLabel="fullName"
         optionValue="id"
         display="chip"
@@ -172,61 +171,7 @@
       </div>
     </div>
     } @if (step() === 1) {
-    <p-fileupload
-      name="myfile[]"
-      [customUpload]="true"
-      [multiple]="false"
-      accept="image/*"
-      [maxFileSize]="3000000"
-      (onSelect)="onSelectedFiles($event)"
-    >
-      <ng-template
-        #header
-        let-chooseCallback="chooseCallback"
-        let-clearCallback="clearCallback"
-      >
-        <div class="flex flex-wrap justify-between items-center flex-1 gap-4">
-          <div class="flex gap-2">
-            <p-button
-              (onClick)="choose($event, chooseCallback)"
-              icon="pi pi-images"
-              [rounded]="true"
-              [outlined]="true"
-            />
-            <p-button
-              (onClick)="uploadEvent()"
-              icon="pi pi-cloud-upload"
-              [rounded]="true"
-              [outlined]="true"
-              severity="success"
-              [disabled]="uploadFileMutation.isPending() || !file"
-            />
-          </div>
-
-          <p-progressbar
-            *ngIf="uploadFileMutation.isPending()"
-            [value]="totalSizePercent"
-            [showValue]="false"
-            class="w-full"
-            styleClass="md:w-20rem h-1 w-full md:ml-auto pulse"
-          >
-          </p-progressbar>
-        </div>
-      </ng-template>
-
-      <ng-template #content>
-        <div class="flex flex-col gap-8 pt-4"></div>
-      </ng-template>
-
-      <ng-template #empty>
-        <div class="flex items-center justify-center flex-col">
-          <i
-            class="pi pi-cloud-upload !border-2 !rounded-full !p-8 !text-4xl !text-muted-color"
-          ></i>
-          <p class="mt-6 mb-0">Arrastra una imagen aquí para subirla.</p>
-        </div>
-      </ng-template>
-    </p-fileupload>
+    <upload-file [dto]="{ id: book.id, bucket: 'books-covers', uploadFn }" />
     }
 
     <div class="flex justify-between mt-6"></div>

@@ -7,13 +7,10 @@ import {
   DialogService,
 } from 'primeng/dynamicdialog';
 import { InputText } from 'primeng/inputtext';
-import { ProgressBar } from 'primeng/progressbar';
 import { CommonModule } from '@angular/common';
 import { Steps } from 'primeng/steps';
 import { ConfirmationService, MenuItem, MessageService } from 'primeng/api';
 import { ToggleSwitch } from 'primeng/toggleswitch';
-import { FileUpload } from 'primeng/fileupload';
-import { PrimeNG } from 'primeng/config';
 import { Card } from 'primeng/card';
 import { IconFieldModule } from 'primeng/iconfield';
 import { TableModule } from 'primeng/table';
@@ -36,6 +33,7 @@ import {
   injectQuery,
   QueryClient,
 } from '@tanstack/angular-query-experimental';
+import { UploadFileComponent } from '../upload-file/upload-file';
 
 @Component({
   selector: 'book-form',
@@ -48,13 +46,12 @@ import {
     InputText,
     ToggleSwitch,
     Button,
-    ProgressBar,
     Steps,
-    FileUpload,
     Card,
     IconFieldModule,
     TableModule,
     MultiSelectModule,
+    UploadFileComponent,
   ],
 })
 export class BookForm {
@@ -68,24 +65,16 @@ export class BookForm {
     step: number | undefined;
     isEditing: boolean;
   }> = inject(DynamicDialogConfig);
-  #config: PrimeNG = inject(PrimeNG);
   #confirmController: ConfirmationService = inject(ConfirmationService);
-
   #fb = inject(FormBuilder);
   #msgService = inject(MessageService);
   #queryClient = inject(QueryClient);
-
   #genresService = inject(GenresService);
   #authorService = inject(AuthorsService);
-
   #bookService = inject(BooksService);
   readonly #auth = inject(AuthenticationService);
-
   step = signal<number>(0);
   steps: MenuItem[] | undefined;
-  file!: File | null;
-  totalSize: number = 0;
-  totalSizePercent: number = 0;
   book: any | undefined;
   authors: any[] = [];
   selectedAuthors: any[] = [];
@@ -156,30 +145,6 @@ export class BookForm {
     },
   }));
 
-  uploadFileMutation = injectMutation(() => ({
-    mutationFn: async ({ dto, book }: { dto: File; book: Book }) =>
-      await this.#bookService.uploadCover(dto, book),
-    onSuccess: () => {
-      this.#msgService.add({
-        severity: 'success',
-        summary: 'Success',
-        detail: 'cover picture was uploaded successfully',
-        life: 3000,
-      });
-      this.#queryClient.invalidateQueries({ queryKey: ['books'] });
-    },
-    onError: (error) => {
-      this.#msgService.add({
-        severity: 'error',
-        summary: 'Error',
-        detail: `Error while upload cover picture: ${error.message}`,
-        life: 3000,
-      });
-    },
-  }));
-
-  uploadedFiles: any[] = [];
-
   ngOnInit(): void {
     this.book = this.#configDialog.data?.book;
     this.isEditing = this.#configDialog.data!.isEditing;
@@ -190,11 +155,12 @@ export class BookForm {
         authors: this.book?.authors.map(({ id }: IAuthor) => id),
         genres: this.book.genres.map(({ id }: IGenre) => id),
       });
-      this.uploadedFiles.push({
-        name: this.book.title,
-        cover_url: this.book.cover_url,
-      });
-      this.uploadedFiles = this.uploadedFiles;
+      // TODO WHEN FILE EXIST DO SOMETHING
+      // this.uploadedFiles.push({
+      //   name: this.book.title,
+      //   cover_url: this.book.cover_url,
+      // });
+      // this.uploadedFiles = this.uploadedFiles;
     }
 
     this.steps = [
@@ -299,7 +265,7 @@ export class BookForm {
       },
     });
     this.#genreDialogRef.onClose.subscribe((result) => {
-      if (!result) this.#genreDialogRef.destroy();
+      console.log(result);
     });
   }
 
@@ -320,7 +286,7 @@ export class BookForm {
       },
     });
     this.#authorDialogRef.onClose.subscribe((result) => {
-      if (!result) this.#authorDialogRef.destroy();
+      console.log(result);
     });
   }
 
@@ -343,72 +309,7 @@ export class BookForm {
     }
   }
 
-  choose(event: Event, callback: CallableFunction) {
-    callback();
-  }
-
-  onRemoveTemplatingFile() {
-    this.file = null;
-  }
-
-  onClearTemplatingUpload(clear: CallableFunction) {
-    clear();
-    this.totalSize = 0;
-    this.totalSizePercent = 0;
-  }
-
-  onTemplatedUpload() {
-    // this.msgService.add({
-    //   severity: 'info',
-    //   summary: 'Success',
-    //   detail: 'File Uploaded',
-    //   life: 3000,
-    // });
-  }
-
-  onSelectedFiles(event: { currentFiles: File[] }) {
-    const MAX_BYTES = 3 * 1024 * 1024; // 3 MB
-
-    const originalFile = event.currentFiles[0];
-    const extension = originalFile.name.split('.').pop()?.toLowerCase();
-
-    const newFileName = `${this.book?.id}.${extension}`;
-
-    const renamedFile = new File([originalFile], newFileName, {
-      type: originalFile.type,
-    });
-
-    this.file = renamedFile;
-
-    this.totalSize = this.file.size;
-    this.totalSizePercent = Math.min((this.totalSize / MAX_BYTES) * 100, 100);
-  }
-
-  async uploadEvent() {
-    await this.uploadFileMutation.mutateAsync({
-      dto: this.file!,
-      book: this.book!,
-    });
-  }
-
-  formatSize(bytes: any) {
-    const k = 1024;
-    const dm = 3;
-    const MAX_BYTES = 3 * k * k;
-    const sizes: string[] | undefined =
-      this.#config.translation.fileSizeTypes ?? [];
-
-    if (bytes === 0) {
-      return `0 ${sizes[0]}`;
-    }
-
-    if (bytes > MAX_BYTES) {
-      return `> 3 ${sizes[2] ?? 'MB'}`;
-    }
-
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    const formattedSize = parseFloat((bytes / Math.pow(k, i)).toFixed(dm));
-
-    return `${formattedSize} ${sizes[i]}`;
+  get uploadFn() {
+    return this.#bookService.uploadCover.bind(this.#bookService);
   }
 }

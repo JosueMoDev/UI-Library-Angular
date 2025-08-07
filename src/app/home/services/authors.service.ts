@@ -16,6 +16,21 @@ export class AuthorsService {
   private auth = inject(AuthenticationService);
   #storageService = inject(StorageService);
 
+  async findAuthorById(id: string): Promise<Author> {
+    const { data, error } = await this.supabase
+      .from('Authors')
+      .select(
+        `*
+      `
+      )
+      .eq('id', id)
+      .single();
+
+    if (error) throw new Error(error.message);
+
+    return Author.fromResponseToAuthor(data);
+  }
+
   async addAuthor(author: CreateAuthorDto): Promise<Author> {
     const { data, error } = await this.supabase
       .from('Authors')
@@ -52,14 +67,15 @@ export class AuthorsService {
     return authorsMappeds;
   }
 
-  async updateProfilePicture(file: File, author: Author) {
+  async updateProfilePicture(file: File, id: string, bucket: string) {
+    await this.findAuthorById(id);
     const { signedUrl } = await this.#storageService.uploadFile({
       file,
       filename: file.name,
-      bucket: 'author-profile',
+      bucket,
     });
     await this.updateAuthor({
-      id: author.id,
+      id,
       updated_by: this.auth.getAuthenticatedUser()!,
       profile_picture_url: signedUrl,
     });
