@@ -38,7 +38,6 @@ import { UploadFileComponent } from '../upload-file/upload-file';
 @Component({
   selector: 'book-form',
   templateUrl: './book-form.html',
-  styleUrl: './book-form.css',
   imports: [
     ButtonModule,
     CommonModule,

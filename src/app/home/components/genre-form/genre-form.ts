@@ -24,8 +24,41 @@ import {
 @Component({
   selector: 'genre-form',
   imports: [ReactiveFormsModule, Card, Button, InputText],
-  templateUrl: './genre-form.html',
-  styleUrl: './genre-form.css',
+  template: `<p-card>
+    <ng-template #title> Book Genre </ng-template>
+    <form class="m-5" [formGroup]="form" (submit)="submit()">
+      <div class="grid gap-4">
+        <input pInputText formControlName="name" placeholder="Título" />
+        <textarea
+          pInputText
+          pSize="large"
+          id="description"
+          formControlName="description"
+          rows="5"
+          cols="30"
+        ></textarea>
+        <label for="description">Description</label>
+      </div>
+
+      <div class="flex gap-4 mt-1 pt-10">
+        <p-button
+          label="Save"
+          class="w-full"
+          styleClass="w-full"
+          pButton
+          label="Guardar"
+          type="submit"
+          severity="success"
+          [loading]="
+            isEditing
+              ? updateGenreMutation.isPending()
+              : addGenreMutation.isPending()
+          "
+          [disabled]="form.invalid"
+        />
+      </div>
+    </form>
+  </p-card>`,
 })
 export class GenreForm {
   // PrimeNG
