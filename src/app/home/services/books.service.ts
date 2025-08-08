@@ -206,13 +206,21 @@ export class BooksService {
     });
   }
 
-  async uploadCover(file: File, id: string, bucket: string) {
+  async uploadCover(
+    file: File,
+    id: string,
+    bucket: string,
+    onProgress: (progress: number) => void
+  ) {
     await this.findBookById(id);
-    const { signedUrl } = await this.#storageService.uploadFile({
-      file,
-      filename: file.name,
-      bucket,
-    });
+    const { signedUrl } = await this.#storageService.uploadFile(
+      {
+        file,
+        filename: file.name,
+        bucket,
+      },
+      onProgress
+    );
 
     const { error: coverBookError } = await this.supabase
       .from('Books')

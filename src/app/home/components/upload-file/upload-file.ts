@@ -3,6 +3,7 @@ import {
   Component,
   inject,
   input,
+  signal,
 } from '@angular/core';
 import {
   injectMutation,
@@ -14,7 +15,12 @@ import { ProgressBar } from 'primeng/progressbar';
 import { PrimeNG } from 'primeng/config';
 import { MessageService } from 'primeng/api';
 
-type UploadFn = (file: File, id: string, bucket: string) => Promise<void>;
+type UploadFn = (
+  file: File,
+  id: string,
+  bucket: string,
+  onProgressFn: (progress: number) => void
+) => Promise<void>;
 
 @Component({
   selector: 'upload-file',
@@ -51,7 +57,7 @@ type UploadFn = (file: File, id: string, bucket: string) => Promise<void>;
         </div>
         @if(uploadFileMutation.isPending()){
         <p-progressbar
-          [value]="totalSizePercent"
+          [value]="uploadProgress()"
           [showValue]="false"
           class="w-full"
         >
@@ -82,6 +88,7 @@ export class UploadFileComponent {
   file!: File | null;
   totalSize: number = 0;
   totalSizePercent: number = 0;
+  uploadProgress = signal(0);
   dto = input.required<{
     id: string;
     bucket: string;
@@ -97,7 +104,10 @@ export class UploadFileComponent {
       file: File;
       id: string;
       bucket: string;
-    }) => await this.dto().uploadFn(file, id, bucket),
+    }) =>
+      await this.dto().uploadFn(file, id, bucket, (progress: number) =>
+        this.uploadProgress.set(progress)
+      ),
     onSuccess: () => {
       this.#msgService.add({
         severity: 'success',
@@ -185,10 +195,6 @@ export class UploadFileComponent {
     const formattedSize = parseFloat((bytes / Math.pow(k, i)).toFixed(dm));
 
     return `${formattedSize} ${sizes[i]}`;
-  }
-
-  onProgress(progress: number) {
-    console.log(progress);
   }
 
   uploadedFiles: any[] = [];

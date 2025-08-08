@@ -67,13 +67,21 @@ export class AuthorsService {
     return authorsMappeds;
   }
 
-  async updateProfilePicture(file: File, id: string, bucket: string) {
+  async updateProfilePicture(
+    file: File,
+    id: string,
+    bucket: string,
+    onProgress: (progress: number) => void
+  ) {
     await this.findAuthorById(id);
-    const { signedUrl } = await this.#storageService.uploadFile({
-      file,
-      filename: file.name,
-      bucket,
-    });
+    const { signedUrl } = await this.#storageService.uploadFile(
+      {
+        file,
+        filename: file.name,
+        bucket,
+      },
+      onProgress
+    );
     await this.updateAuthor({
       id,
       updated_by: this.auth.getAuthenticatedUser()!,
