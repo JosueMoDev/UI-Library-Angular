@@ -39,7 +39,6 @@ import { Button } from 'primeng/button';
     >
     </p-drawer>
   `,
-  styleUrl: './book-query.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BookQuery {
